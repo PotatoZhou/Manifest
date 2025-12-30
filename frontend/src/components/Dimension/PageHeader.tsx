@@ -45,9 +45,9 @@ const PageHeader: React.FC<PageHeaderProps> = ({
       <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
         <YearSelector currentYear={currentYear} onChange={onYearChange} />
 
-        <Button onClick={toggleDarkMode} type="light">
+        {/* <Button onClick={toggleDarkMode} type="light">
           {darkMode ? <Sun size={16} /> : <Moon size={16} />}
-        </Button>
+        </Button> */}
       </div>
     </div>
   );
