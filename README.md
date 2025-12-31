@@ -5,7 +5,7 @@
 [![Language: Go/React](https://img.shields.io/badge/Language-Go%2FReact-brightgreen.svg)](https://golang.org/)
 [![Framework: Wails](https://img.shields.io/badge/Framework-Wails-purple.svg)](https://wails.io/)
 
-性能管理系统是一个现代化的绩效评估工具，帮助你设定年度目标、跟踪任务进度、多维度评估绩效表现，实现高效的年度计划管理与绩效提升。
+Manifest是一个现代化的绩效评估工具，帮助你设定年度目标、跟踪任务进度、多维度评估绩效表现，实现高效的年度计划管理与绩效提升。
 
 ## 📖 目录
 
@@ -234,3 +234,8 @@ performance-wails/
 **让我们一起打造更高效的性能管理工具！** 🎉
 
 *Powered by Wails, React and Go*
+
+🙏 致谢
+本项目的诞生离不开以下支持：
+
+UI/UX Design: 特别感谢 Fiona Zhou 的精美设计，她为 Manifest 提供了专业、现代且极具易用性的视觉方案，让工具不仅好用，更加好看。
