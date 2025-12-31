@@ -1,4 +1,4 @@
-<div align="center">Manifest (WIP)</div>
+<div align="center"><h1>Manifest (WIP)</h1></div>
 
 <p align="center">
   <strong>🚀 高效管理你的年度目标与任务，量化你的成长与进步</strong>
