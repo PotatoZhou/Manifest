@@ -1,8 +1,5 @@
 <div align="center"><h1>Manifest (WIP)</h1></div>
 
-<p align="center">
-  <strong>🚀 高效管理你的年度目标与任务，量化你的成长与进步</strong>
-</p>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Language: Go/React](https://img.shields.io/badge/Language-Go%2FReact-brightgreen.svg)](https://golang.org/)
