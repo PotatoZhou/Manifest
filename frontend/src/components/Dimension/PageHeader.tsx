@@ -1,6 +1,4 @@
 import React from 'react';
-import { Sun, Moon } from 'lucide-react';
-import Button from '../Button/Button';
 import YearSelector from '../YearSelector/YearSelector';
 
 interface PageHeaderProps {
@@ -8,8 +6,6 @@ interface PageHeaderProps {
   currentMonth: number;
   currentYear: string;
   onYearChange: (year: string) => void;
-  darkMode: boolean;
-  toggleDarkMode: () => void;
 }
 
 const months = [
@@ -21,9 +17,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   activeTab, 
   currentMonth, 
   currentYear, 
-  onYearChange, 
-  darkMode, 
-  toggleDarkMode 
+  onYearChange 
 }) => {
   const getTitle = () => {
     if (activeTab === 'planning') return '🎯 年度与季度规划';

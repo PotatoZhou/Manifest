@@ -14,12 +14,9 @@
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    box-shadow: none;
-    border-right: 1px solid #f0f0f0;
     height: 100vh;
     overflow-y: hidden;
     z-index: 100;
-    transition: width 0.3s ease;
     box-sizing: border-box;
 }
 
@@ -28,14 +25,13 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 4px 20px 4px; /* 微调内边距 */
-    --wails-draggable: none; /* 默认不显示红绿灯 */
-    transition: --wails-draggable 0.3s ease;
+    padding: 15px 4px 20px 4px;
+    --wails-draggable: none;
 }
 
-/* 鼠标悬停时显示红绿灯 */
+/* 禁用鼠标悬停时显示红绿灯 */
 .logo-section:hover {
-    --wails-draggable: drag;
+    --wails-draggable: none;
 }
 
 .logo-content {
@@ -190,12 +186,34 @@
 .sidebar.collapsed {
     width: 68px;
     padding: 16px 8px;
+    box-shadow: none;
+}
+
+/* 当侧边栏折叠时，调整主内容区的margin-left */
+.sidebar.collapsed + .main-content-wrapper {
+    margin-left: 0;
+}
+
+.sidebar.collapsed .logo-section {
+    justify-content: center;
+}
+
+/* 增强内容的过渡效果 */
+.sidebar .logo-text,
+.sidebar .search-input,
+.sidebar span:not(.nav-icon) {
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.3s ease, transform 0.3s ease, display 0.3s step-end;
 }
 
 .sidebar.collapsed .logo-text,
 .sidebar.collapsed .search-input,
 .sidebar.collapsed span:not(.nav-icon) {
+    opacity: 0;
+    transform: translateX(-10px);
     display: none;
+    transition: opacity 0.3s ease, transform 0.3s ease, display 0.3s step-start;
 }
 
 .sidebar.collapsed .nav-item,

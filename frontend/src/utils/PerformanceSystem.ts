@@ -291,6 +291,7 @@ class PerformanceSystem {
 
   // 更新月度任务
   public async updateMonthlyTask(dimension: string, month: number, taskId: string, updates: Partial<Task>): Promise<void> {
+    console.log('updateMonthlyTask called:', { dimension, month, taskId, updates });
     const yearData = this.data[this.currentYear];
     if (yearData && yearData.dimensions[dimension] && month >= 0 && month < 12) {
       const dimData = yearData.dimensions[dimension];
@@ -298,11 +299,19 @@ class PerformanceSystem {
       if (tasks) {
         const taskIndex = tasks.findIndex((t: Task) => t.id === taskId);
         if (taskIndex !== -1) {
+          console.log('Task found, updating:', tasks[taskIndex]);
           tasks[taskIndex] = { ...tasks[taskIndex], ...updates };
+          console.log('Task after update:', tasks[taskIndex]);
           this.updateDimensionStats(dimension);
           await this.saveData();
+        } else {
+          console.log('Task not found:', taskId);
         }
+      } else {
+        console.log('No tasks found for month:', month);
       }
+    } else {
+      console.log('Invalid dimension or month:', { dimension, month });
     }
   }
 

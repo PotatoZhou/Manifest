@@ -5,3 +5,108 @@
 @import './styles/components.css';
 @import './styles/dark-mode.css';
 @import './styles/responsive.css';
+
+/* 自定义红绿灯样式 */
+.custom-traffic-lights {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    gap: 8px;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.traffic-light {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    opacity: 0.8;
+    pointer-events: auto;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.traffic-light:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.traffic-light.red {
+    background-color: #ff5f57;
+}
+
+.traffic-light.yellow {
+    background-color: #ffbd2e;
+}
+
+.traffic-light.green {
+    background-color: #28ca42;
+}
+
+/* 加载容器居中样式 */
+.loading-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-bg);
+    z-index: 1000;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* 靶心容器 */
+.target-container {
+    position: relative;
+    width: 200px;
+    height: 200px;
+}
+
+/* 靶心 */
+.target {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle,
+        #ff0000 0%,
+        #ff0000 10%,
+        #ffffff 10%,
+        #ffffff 20%,
+        #ff0000 20%,
+        #ff0000 30%,
+        #ffffff 30%,
+        #ffffff 40%,
+        #ff0000 40%,
+        #ff0000 50%,
+        #ffffff 50%,
+        #ffffff 60%,
+        #ff0000 60%,
+        #ff0000 70%,
+        #ffffff 70%,
+        #ffffff 80%,
+        #ff0000 80%,
+        #ff0000 90%,
+        #ffffff 90%,
+        #ffffff 100%);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    animation: targetPulse 2s ease-in-out infinite;
+}
+
+/* 靶心脉动动画 */
+@keyframes targetPulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.05);
+    }
+}

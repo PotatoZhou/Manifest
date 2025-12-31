@@ -1,5 +1,5 @@
 import React from 'react';
-import { Gauge, Palette, History, Settings, PanelLeftClose, Languages, Target, HelpCircle, BookOpen } from 'lucide-react';
+import { Gauge, Palette, History, Settings, PanelLeftClose, Languages, Target, HelpCircle, BookOpen, PanelRightOpen } from 'lucide-react';
 
 import type { Account } from '../../utils/PerformanceSystem';
 
@@ -42,7 +42,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange, darkMode, 
           className="sidebar-toggle-btn"
           onClick={onToggleCollapse}
         >
-          <PanelLeftClose size={20} strokeWidth={1.25} />
+          {isCollapsed ? <PanelRightOpen size={20} strokeWidth={1.25} /> : <PanelLeftClose size={20} strokeWidth={1.25} />}
         </button>
       </div>
       

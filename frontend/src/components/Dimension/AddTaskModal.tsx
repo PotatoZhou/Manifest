@@ -1,14 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
-import { Modal, Form, Input, InputNumber, Select } from 'antd';
+import { Modal, Form, Input, InputNumber, Select, DatePicker } from 'antd';
 
 interface AddTaskModalProps {
   open: boolean;
   onCancel: () => void;
   onOk: () => void;
   form: any;
+  onFinish: (values: any) => void;
 }
 
-const AddTaskModal: React.FC<AddTaskModalProps> = ({ open, onCancel, onOk, form }) => {
+const AddTaskModal: React.FC<AddTaskModalProps> = ({ open, onCancel, onOk, form, onFinish }) => {
   return (
     <Modal
       title="新增任务"
@@ -22,6 +24,7 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({ open, onCancel, onOk, form 
       <Form
         form={form}
         layout="vertical"
+        onFinish={onFinish}
       >
         <Form.Item
           name="title"
@@ -65,6 +68,18 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({ open, onCancel, onOk, form 
             <Select.Option value="medium">中</Select.Option>
             <Select.Option value="high">高</Select.Option>
           </Select>
+        </Form.Item>
+        <Form.Item
+          name="startDate"
+          label="开始日期"
+        >
+          <DatePicker style={{ width: '100%' }} placeholder="请选择开始日期" />
+        </Form.Item>
+        <Form.Item
+          name="endDate"
+          label="结束日期"
+        >
+          <DatePicker style={{ width: '100%' }} placeholder="请选择结束日期" />
         </Form.Item>
       </Form>
     </Modal>

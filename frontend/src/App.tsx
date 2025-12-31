@@ -153,21 +153,27 @@ function App() {
   const renderCurrentPage = () => {
     switch (currentPage) {
       case 'dashboard':
-        return <DashboardPage currentYear={currentYear} onYearChange={handleYearChange} darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+        return <div key="dashboard" className="page-transition"><DashboardPage currentYear={currentYear} onYearChange={handleYearChange} darkMode={darkMode} toggleDarkMode={toggleDarkMode} /></div>
       case 'dimension':
-        return <DimensionPage dimensionKey="dream" currentYear={currentYear} onYearChange={handleYearChange} darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+        return <DimensionPage dimensionKey="dream" currentYear={currentYear} onYearChange={handleYearChange} />
       case 'years':
-        return <YearsPage currentYear={currentYear} onYearChange={handleYearChange} darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+        return <div key="years" className="page-transition"><YearsPage currentYear={currentYear} onYearChange={handleYearChange} darkMode={darkMode} toggleDarkMode={toggleDarkMode} /></div>
       case 'settings':
-        return <SettingsPage currentYear={currentYear} onYearChange={handleYearChange} darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+        return <div key="settings" className="page-transition"><SettingsPage currentYear={currentYear} onYearChange={handleYearChange} darkMode={darkMode} toggleDarkMode={toggleDarkMode} /></div>
       default:
-        return <DashboardPage currentYear={currentYear} onYearChange={handleYearChange} darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+        return <div key="dashboard" className="page-transition"><DashboardPage currentYear={currentYear} onYearChange={handleYearChange} darkMode={darkMode} toggleDarkMode={toggleDarkMode} /></div>
     }
   }
 
   // 加载中
   if (isLoading) {
-    return <div className="loading-container">加载中...</div>
+    return (
+      <div className="loading-container">
+        <div className="target-container">
+          <div className="target"></div>
+        </div>
+      </div>
+    )
   }
 
   // 显示账号选择页面
@@ -206,10 +212,8 @@ function App() {
       <div className="main-content-wrapper">
         {/* 主卡片 */}
         <div className="content-card">
-          {/* 业务内容 */}
-          <div className="main-content">
-            {renderCurrentPage()}
-          </div>
+          {/* 业务内容 - 直接渲染页面，不使用main-content包装 */}
+          {renderCurrentPage()}
         </div>
       </div>
     </div>

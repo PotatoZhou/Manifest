@@ -1,6 +1,6 @@
 import React from 'react';
-import { Plus, ListTodo } from 'lucide-react';
-import { Button } from 'antd';
+import { Plus, ListTodo, Square } from 'lucide-react';
+import { Button, Tooltip } from 'antd';
 import type { Task } from '../../utils/PerformanceSystem';
 import TaskCard from './TaskCard';
 
@@ -16,8 +16,13 @@ interface TasksViewProps {
   addTask: () => void;
   minimizedTasks: Set<string>;
   toggleTaskMinimize: (taskId: string) => void;
-  updateTask: (taskId: string, field: keyof Task, value: any) => void;
+  updateTask: <K extends keyof Task>(taskId: string, field: K, value: Task[K]) => void;
   deleteTask: (taskId: string) => void;
+  isBatchMode: boolean;
+  toggleBatchMode: () => void;
+  selectedTasks: Set<string>;
+  toggleTaskSelection: (taskId: string) => void;
+  batchDeleteTasks: () => void;
 }
 
 const months = [
@@ -33,7 +38,12 @@ const TasksView: React.FC<TasksViewProps> = ({
   minimizedTasks, 
   toggleTaskMinimize, 
   updateTask, 
-  deleteTask 
+  deleteTask,
+  isBatchMode,
+  toggleBatchMode,
+  selectedTasks,
+  toggleTaskSelection,
+  batchDeleteTasks
 }) => {
   const monthlyTasks = dimData.monthlyTasks[currentMonth] || [];
 
@@ -41,29 +51,96 @@ const TasksView: React.FC<TasksViewProps> = ({
     <div className="view-animate" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* 任务卡片列表 */}
       <div style={{ backgroundColor: '#fff', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)', padding: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '600', color: '#262626' }}>
-            <span style={{ color: config.color }}>{months[currentMonth]}</span> 行动项
-          </h3>
-          <Button 
-            onClick={addTask} 
-            style={{ 
-              backgroundColor: config.color, 
-              color: '#fff', 
-              border: 'none', 
-              borderRadius: '8px', 
-              padding: '10px 16px',
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            <Plus size={16} style={{ marginRight: '6px' }} /> 新增任务
-          </Button>
-        </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '600', color: '#262626' }}>
+              <span style={{ color: config.color }}>{months[currentMonth]}</span> 行动项
+            </h3>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <Tooltip title="批量管理">
+                <Button 
+                  onClick={toggleBatchMode} 
+                  style={{ 
+                    backgroundColor: isBatchMode ? config.color : '#f5f5f5', 
+                    color: isBatchMode ? '#fff' : '#262626', 
+                    border: 'none', 
+                    borderRadius: '8px', 
+                    padding: '10px',
+                    fontSize: '0.9rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  <Square size={16} />
+                </Button>
+              </Tooltip>
+              <Button 
+                onClick={addTask} 
+                style={{ 
+                  backgroundColor: config.color, 
+                  color: '#fff', 
+                  border: 'none', 
+                  borderRadius: '8px', 
+                  padding: '10px 16px',
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <Plus size={16} style={{ marginRight: '6px' }} /> 新增任务
+              </Button>
+            </div>
+          </div>
         
+        {/* 批量操作栏 */}
+        {isBatchMode && selectedTasks.size > 0 && (
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'flex-end', 
+            alignItems: 'center', 
+            gap: '12px',
+            padding: '16px',
+            backgroundColor: '#fafafa',
+            borderRadius: '10px',
+            marginBottom: '20px'
+          }}>
+            <span style={{ 
+              fontSize: '0.9rem', 
+              color: '#595959',
+              fontWeight: '500'
+            }}>
+              已选择 {selectedTasks.size} 项
+            </span>
+            <button 
+              onClick={batchDeleteTasks}
+              style={{ 
+                backgroundColor: '#ff4d4f', 
+                color: '#fff', 
+                border: 'none', 
+                borderRadius: '8px', 
+                padding: '8px 16px',
+                fontSize: '0.85rem',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.backgroundColor = '#ff7875';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.backgroundColor = '#ff4d4f';
+              }}
+            >
+              批量删除
+            </button>
+          </div>
+        )}
+
         {/* 任务列表 */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '8px' // 统一间距为8px
+        }}>
           {monthlyTasks.map((task: Task) => (
             <TaskCard 
               key={task.id}
@@ -73,6 +150,9 @@ const TasksView: React.FC<TasksViewProps> = ({
               toggleTaskMinimize={toggleTaskMinimize}
               updateTask={updateTask}
               deleteTask={deleteTask}
+              isBatchMode={isBatchMode}
+              isSelected={selectedTasks.has(task.id)}
+              toggleSelection={toggleTaskSelection}
             />
           ))}
         </div>

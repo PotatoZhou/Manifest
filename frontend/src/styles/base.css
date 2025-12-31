@@ -20,8 +20,10 @@ html, body {
     height: 100%;
     width: 100%;
     margin: 0;
+    padding: 0;
     overflow: hidden;
     font-size: 0.875rem; /* 缩小全局字号 */
+    background: transparent;
 }
 
 * {
@@ -45,4 +47,8 @@ body {
     width: 100vw;
     position: relative;
     background-color: var(--color-bg);
+    /* 移除可能冲突的样式 */
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
 }

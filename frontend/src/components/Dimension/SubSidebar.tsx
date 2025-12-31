@@ -51,6 +51,7 @@ const SubSidebar: React.FC<SubSidebarProps> = ({
   const styles = {
     subSidebar: {
       width: '260px',
+      height: '100%',
       backgroundColor: '#fff',
       borderRight: '1px solid #e8e8e8',
       display: 'flex',

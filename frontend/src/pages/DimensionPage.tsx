@@ -19,14 +19,12 @@ interface DimensionPageProps {
   dimensionKey: string;
   currentYear: string;
   onYearChange: (year: string) => void;
-  darkMode: boolean;
-  toggleDarkMode: () => void;
 }
 
 // 定义二级菜单类型
 type ViewTab = 'planning' | 'tasks' | 'analysis';
 
-const DimensionPage: React.FC<DimensionPageProps> = ({ dimensionKey, currentYear, onYearChange, darkMode, toggleDarkMode }) => {
+const DimensionPage: React.FC<DimensionPageProps> = ({ dimensionKey, currentYear, onYearChange }) => {
   // --- 状态管理 ---
   const [activeTab, setActiveTab] = useState<ViewTab>('tasks');
   const [currentMonth, setCurrentMonth] = useState(performanceSystem.getCurrentMonth());
@@ -49,6 +47,10 @@ const DimensionPage: React.FC<DimensionPageProps> = ({ dimensionKey, currentYear
   const [minimizedTasks, setMinimizedTasks] = useState<Set<string>>(new Set());
   // 显示烟花效果的任务ID
   // const [_, setFireworkTaskId] = useState<string | null>(null);
+  // 批量选择模式
+  const [isBatchMode, setIsBatchMode] = useState(false);
+  // 选中的任务ID集合
+  const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set());
   
   // 获取所有维度配置
   const [allDimensions, setAllDimensions] = useState(performanceSystem.getAllDimensionConfigs());
@@ -87,6 +89,22 @@ const DimensionPage: React.FC<DimensionPageProps> = ({ dimensionKey, currentYear
     setIsAddTaskModalVisible(true);
   };
 
+  // 处理新增任务表单提交
+  const handleAddTaskFinish = async (values: any) => {
+    try {
+      // 使用performanceSystem添加新任务
+      await performanceSystem.addMonthlyTask(selectedDimension, currentMonth, values);
+      // 更新数据
+      setYearData(performanceSystem.getCurrentYearData());
+      // 关闭模态框
+      setIsAddTaskModalVisible(false);
+      // 重置表单
+      addTaskForm.resetFields();
+    } catch (error) {
+      console.error('添加任务失败:', error);
+    }
+  };
+
   // 切换任务最小化状态
   const toggleTaskMinimize = (taskId: string) => {
     setMinimizedTasks(prev => {
@@ -105,11 +123,14 @@ const DimensionPage: React.FC<DimensionPageProps> = ({ dimensionKey, currentYear
     console.log('firework----->', taskId);
   };
 
-  const updateTask = async (taskId: string, field: keyof Task, value: any) => {
+  const updateTask = async <K extends keyof Task>(taskId: string, field: K, value: Task[K]) => {
     // 如果任务状态变为已完成，记录下来
     const shouldMinimize = field === 'status' && value === 'completed';
     
-    await performanceSystem.updateMonthlyTask(selectedDimension, currentMonth, taskId, { [field]: value });
+    console.log('updateTask called:', { taskId, field, value, selectedDimension, currentMonth });
+    // 创建一个类型安全的更新对象
+    const updates = { [field]: value } as Partial<Task>;
+    await performanceSystem.updateMonthlyTask(selectedDimension, currentMonth, taskId, updates);
     setYearData(performanceSystem.getCurrentYearData());
     
     // 如果任务完成，自动最小化并显示烟花
@@ -121,6 +142,44 @@ const DimensionPage: React.FC<DimensionPageProps> = ({ dimensionKey, currentYear
 
   const deleteTask = (taskId: string) => {
     setTaskIdToDelete(taskId);
+    setIsDeleteTaskModalVisible(true);
+  };
+
+  // 切换批量选择模式
+  const toggleBatchMode = () => {
+    const newBatchMode = !isBatchMode;
+    setIsBatchMode(newBatchMode);
+    
+    // 如果进入批量选择模式，将所有当前月份的任务变为最小化
+    if (newBatchMode) {
+      const currentMonthTasks = dimData.monthlyTasks[currentMonth] || [];
+      const allTaskIds = currentMonthTasks.map(task => task.id);
+      setMinimizedTasks(new Set(allTaskIds));
+    }
+    
+    // 如果退出批量选择模式，清空选中的任务
+    if (isBatchMode) {
+      setSelectedTasks(new Set());
+    }
+  };
+
+  // 切换单个任务的选择状态
+  const toggleTaskSelection = (taskId: string) => {
+    setSelectedTasks(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(taskId)) {
+        newSet.delete(taskId);
+      } else {
+        newSet.add(taskId);
+      }
+      return newSet;
+    });
+  };
+
+  // 批量删除选中的任务
+  const batchDeleteTasks = async () => {
+    // 显示确认模态框
+    setTaskIdToDelete(Array.from(selectedTasks).join(','));
     setIsDeleteTaskModalVisible(true);
   };
 
@@ -148,80 +207,72 @@ const DimensionPage: React.FC<DimensionPageProps> = ({ dimensionKey, currentYear
   };
 
 
-  // --- 内部样式对象 ---
-  const styles = {
+ const styles = {
     container: {
       display: 'flex',
-      height: '100vh',
-      overflow: 'hidden',
-      backgroundColor: '#f0f2f5',
-      marginLeft: '-30px' // 抵消main-content的padding，让二级sidebar紧贴主sidebar
+      height: '100%', 
+      width: '100%',
+      overflow: 'hidden', // 禁止父级滚动
+      backgroundColor: 'transparent',
+      margin: 0,
+      padding: 0,
     },
     subSidebar: {
       width: '260px',
+      height: '100%', // 关键 2: 侧边栏撑满容器高度
       backgroundColor: '#fff',
-      borderRight: '1px solid #e8e8e8',
+      borderRight: '1px solid #f0f0f0',
       display: 'flex',
       flexDirection: 'column' as const,
-      padding: '20px 0',
-      boxShadow: '2px 0 8px rgba(0,0,0,0.05)'
+      flexShrink: 0, // 防止被右侧内容挤窄
+      overflowY: 'auto' as const, // 如果侧边栏内容多，允许它自己滚动
+      borderTopLeftRadius: '24px', // 左上角圆角，匹配外层
+      borderBottomLeftRadius: '24px', // 左下角圆角，匹配外层
     },
     mainContent: {
       flex: 1,
-      overflowY: 'auto' as const,
+      height: '100%', // 关键 3: 撑满容器
       padding: '24px',
-      position: 'relative' as const
-    },
-    navItem: (isActive: boolean) => ({
-      padding: '14px 24px',
-      cursor: 'pointer',
+      overflowY: 'auto' as const, // 关键 4: 只有这里允许上下滚动
+      backgroundColor: '#f5f7fa',
       display: 'flex',
-      alignItems: 'center',
-      fontSize: '0.95rem',
-      fontWeight: isActive ? '600' : '400',
-      color: isActive ? config.color : '#595959',
-      backgroundColor: isActive ? `${config.color}0D` : 'transparent',
-      borderRight: `3px solid ${isActive ? config.color : 'transparent'}`,
-      transition: 'all 0.3s'
-    }),
-    monthGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(3, 1fr)',
-      gap: '8px',
-      padding: '15px'
-    }
+      flexDirection: 'column' as const,
+      borderTopRightRadius: '24px', // 右上角圆角，匹配外层
+      borderBottomRightRadius: '24px', // 右下角圆角，匹配外层
+    },
+    // ... 其他样式
   };
 
   return (
-    <div style={styles.container}>
+    <div style={styles.container} className="page-transition">
       {/* --- 1. 二级侧边栏 (Sub-Sidebar) --- */}
-      <SubSidebar 
-        activeTab={activeTab}
-        currentMonth={currentMonth}
-        setActiveTab={setActiveTab}
-        setCurrentMonth={setCurrentMonth}
-        allDimensions={allDimensions}
-        selectedDimension={selectedDimension}
-        setSelectedDimension={setSelectedDimension}
-        showAddDimension={showAddDimension}
-        setShowAddDimension={setShowAddDimension}
-        newDimensionName={newDimensionName}
-        setNewDimensionName={setNewDimensionName}
-        newDimensionColor={newDimensionColor}
-        setNewDimensionColor={setNewDimensionColor}
-        handleAddDimension={handleAddDimension}
-      />
+      <div style={styles.subSidebar}>
+        <SubSidebar 
+          activeTab={activeTab}
+          currentMonth={currentMonth}
+          setActiveTab={setActiveTab}
+          setCurrentMonth={setCurrentMonth}
+          allDimensions={allDimensions}
+          selectedDimension={selectedDimension}
+          setSelectedDimension={setSelectedDimension}
+          showAddDimension={showAddDimension}
+          setShowAddDimension={setShowAddDimension}
+          newDimensionName={newDimensionName}
+          setNewDimensionName={setNewDimensionName}
+          newDimensionColor={newDimensionColor}
+          setNewDimensionColor={setNewDimensionColor}
+          handleAddDimension={handleAddDimension}
+        />
+      </div>
 
       {/* --- 2. 主内容区域 (Main Content) --- */}
-      <main style={styles.mainContent}>
+      <div style={styles.mainContent}>
         {/* 顶部通栏 */}
         <PageHeader 
           activeTab={activeTab}
           currentMonth={currentMonth}
           currentYear={currentYear}
           onYearChange={onYearChange}
-          darkMode={darkMode}
-          toggleDarkMode={toggleDarkMode}
         />
 
 
@@ -250,6 +301,11 @@ const DimensionPage: React.FC<DimensionPageProps> = ({ dimensionKey, currentYear
             toggleTaskMinimize={toggleTaskMinimize}
             updateTask={updateTask}
             deleteTask={deleteTask}
+            isBatchMode={isBatchMode}
+            toggleBatchMode={toggleBatchMode}
+            selectedTasks={selectedTasks}
+            toggleTaskSelection={toggleTaskSelection}
+            batchDeleteTasks={batchDeleteTasks}
           />
         )}
 
@@ -267,6 +323,7 @@ const DimensionPage: React.FC<DimensionPageProps> = ({ dimensionKey, currentYear
           open={isAddTaskModalVisible}
           onCancel={() => setIsAddTaskModalVisible(false)}
           onOk={() => addTaskForm.submit()}
+          onFinish={handleAddTaskFinish}
           form={addTaskForm}
         />
 
@@ -280,7 +337,7 @@ const DimensionPage: React.FC<DimensionPageProps> = ({ dimensionKey, currentYear
             setIsDeleteTaskModalVisible(false);
           }}
         />
-      </main>
+      </div>
     </div>
   );
 };

@@ -60,7 +60,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ currentYear, onYearChange, 
   };
 
   return (
-    <div id="settings-page" className="page">
+    <div id="settings-page" className="page" style={{ padding: '20px 30px' }}>
       <div className="page-header">
         <h2><SettingsIcon size={18} style={{ marginRight: '8px' }} /> 系统设置</h2>
         <YearSelector currentYear={currentYear} onChange={onYearChange} />
@@ -216,7 +216,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ currentYear, onYearChange, 
           
           <div className="about-item">
             <h4>版本</h4>
-            <p>v4.0.0</p>
+            <p>v0.0.1</p>
           </div>
           
           <div className="about-item">

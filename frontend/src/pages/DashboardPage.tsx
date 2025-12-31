@@ -90,59 +90,60 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ currentYear, onYearChange
   // 转换任务数据为日历格式（纯函数）
   const getCalendarTasks = () => {
     const tasksByDate: Record<string, any[]> = {};
-    const dimensions = ['dream', 'health', 'work', 'mind'];
     
-    dimensions.forEach(dimension => {
+    // 使用所有维度配置，包括自定义维度
+    allDimensions.forEach(dimensionConfig => {
+      const dimension = dimensionConfig.key;
       const dimData = yearData.dimensions?.[dimension];
       // 确保dimData是DimensionData类型且monthlyTasks是有效数组
       if (typeof dimData === 'object' && dimData && 'monthlyTasks' in dimData && Array.isArray(dimData.monthlyTasks)) {
         dimData.monthlyTasks.forEach((monthTasks: any[], monthIndex: number) => {
           if (Array.isArray(monthTasks)) {
             monthTasks.forEach((task: any) => {
-            // 处理开始日期
-            if (task.startDate) {
-              const dateKey = task.startDate;
-              if (!tasksByDate[dateKey]) {
-                tasksByDate[dateKey] = [];
+              // 处理开始日期
+              if (task.startDate) {
+                const dateKey = task.startDate;
+                if (!tasksByDate[dateKey]) {
+                  tasksByDate[dateKey] = [];
+                }
+                tasksByDate[dateKey].push({
+                  ...task,
+                  dimension,
+                  type: 'start'
+                });
               }
-              tasksByDate[dateKey].push({
-                ...task,
-                dimension,
-                type: 'start'
-              });
-            }
-            
-            // 处理结束日期
-            if (task.endDate) {
-              const dateKey = task.endDate;
-              if (!tasksByDate[dateKey]) {
-                tasksByDate[dateKey] = [];
+              
+              // 处理结束日期
+              if (task.endDate) {
+                const dateKey = task.endDate;
+                if (!tasksByDate[dateKey]) {
+                  tasksByDate[dateKey] = [];
+                }
+                tasksByDate[dateKey].push({
+                  ...task,
+                  dimension,
+                  type: 'end'
+                });
               }
-              tasksByDate[dateKey].push({
-                ...task,
-                dimension,
-                type: 'end'
-              });
-            }
-            
-            // 如果没有日期，至少显示在当前月份的第一天
-            if (!task.startDate && !task.endDate) {
-              const monthStr = (monthIndex + 1).toString().padStart(2, '0');
-              const dateKey = `${currentYear}-${monthStr}-01`;
-              if (!tasksByDate[dateKey]) {
-                tasksByDate[dateKey] = [];
+              
+              // 如果没有日期，至少显示在当前月份的第一天
+              if (!task.startDate && !task.endDate) {
+                const monthStr = (monthIndex + 1).toString().padStart(2, '0');
+                const dateKey = `${currentYear}-${monthStr}-01`;
+                if (!tasksByDate[dateKey]) {
+                  tasksByDate[dateKey] = [];
+                }
+                tasksByDate[dateKey].push({
+                  ...task,
+                  dimension,
+                  type: 'no-date'
+                });
               }
-              tasksByDate[dateKey].push({
-                ...task,
-                dimension,
-                type: 'no-date'
-              });
-            }
-          });
-        }
-      });
-    }
-  });
+            });
+          }
+        });
+      }
+    });
     
     return tasksByDate;
   };
@@ -177,7 +178,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ currentYear, onYearChange
   }, [currentYear]);
 
   return (
-    <div id="dashboard-page" className="page">
+    <div id="dashboard-page" className="page" style={{ padding: '20px 30px' }}>
       <div className="page-header">
         <h2><Gauge size={18} style={{ marginRight: '8px' }} /> 年度绩效总览</h2>
         <YearSelector currentYear={currentYear} onChange={onYearChange} />
@@ -257,20 +258,9 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ currentYear, onYearChange
         <div style={{ padding: '20px', display: 'flex', justifyContent: 'center' }}>
           {/* 样式：统一日历背景颜色 */}
           <style>{`
-            .ant-picker-calendar-content tr:nth-child(even) .ant-picker-cell-inner {
-              background-color: white;
-            }
-            .ant-picker-calendar-content tr:nth-child(odd) .ant-picker-cell-inner {
-              background-color: white;
-            }
-            .ant-picker-cell-inner {
-              background-color: white !important;
-              padding: 15px 0 !important;
-              height: auto !important;
-            }
             .ant-picker-calendar {
               width: 100% !important;
-              max-width: 100% !important;
+              max-width: 1200px !important;
             }
             .ant-picker-calendar-header {
               padding: 15px 20px;
@@ -278,12 +268,28 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ currentYear, onYearChange
             .ant-picker-calendar-content th {
               padding: 12px 0;
             }
+            .ant-picker-calendar-content .ant-picker-cell-inner {
+              background-color: white;
+              padding: 10px 0;
+            }
+            /* 修复年份视图中月份重复显示的问题 */
+            .ant-picker-calendar-year-panel {
+              display: grid;
+              grid-template-columns: repeat(4, 1fr);
+              gap: 10px;
+            }
+            .ant-picker-calendar-year-panel .ant-picker-calendar-month {
+              width: auto !important;
+              margin: 0 !important;
+            }
           `}</style>
           
           <Calendar
+            mode="year"
             value={calendarValue}
             onChange={handleCalendarChange}
             cellRender={(current, info) => {
+              // 只处理日期单元格，不处理月份标题或其他类型的单元格
               if (info.type === 'date') {
                 const dateKey = current.format('YYYY-MM-DD');
                 const calendarData = getCalendarTasks();
@@ -382,6 +388,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ currentYear, onYearChange
                   </Popover>
                 );
               }
+              // 对于非日期单元格（包括月份标题），直接返回原始节点
               return info.originNode;
             }}
 

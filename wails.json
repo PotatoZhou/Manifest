@@ -9,5 +9,13 @@
   "author": {
     "name": "gjzhou",
     "email": "92616697+PotatoZhou@users.noreply.github.com"
+  },
+  "windows": {
+    "width": 1200,
+    "height": 800,
+    "resizable": true,
+    "title": "performance-wails",
+    "frame": true,
+    "transparent": false
   }
 }

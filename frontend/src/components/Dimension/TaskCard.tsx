@@ -1,7 +1,52 @@
 import React from 'react';
-import { Trash } from 'lucide-react';
-import { Select } from 'antd';
+import { Select, DatePicker } from 'antd';
+import dayjs from 'dayjs';
 import type { Task } from '../../utils/PerformanceSystem';
+
+// 样式常量定义
+const styles = {
+  colors: {
+    primary: '#1890ff',
+    success: '#52c41a',
+    warning: '#faad14',
+    error: '#ff4d4f',
+    deepGray: '#595959',
+    mediumGray: '#8c8c8c',
+    lightGray: '#d9d9d9',
+    extraLightGray: '#f5f5f5',
+    white: '#ffffff',
+    black: '#262626',
+  },
+  spacing: {
+    xs: '4px',
+    sm: '8px',
+    md: '16px',
+    lg: '24px',
+    xl: '32px',
+  },
+  borderRadius: {
+    sm: '4px',
+    md: '8px',
+    lg: '12px',
+  },
+  fontSize: {
+    xs: '12px',
+    sm: '14px',
+    md: '16px',
+    lg: '18px',
+  },
+  fontWeight: {
+    normal: '400',
+    medium: '500',
+    semiBold: '600',
+    bold: '700',
+  },
+  boxShadow: {
+    light: '0 2px 8px rgba(0,0,0,0.04)',
+    medium: '0 4px 12px rgba(0,0,0,0.06)',
+    strong: '0 8px 24px rgba(0,0,0,0.08)',
+  },
+};
 
 interface TaskCardProps {
   task: Task;
@@ -10,8 +55,11 @@ interface TaskCardProps {
   };
   minimizedTasks: Set<string>;
   toggleTaskMinimize: (taskId: string) => void;
-  updateTask: (taskId: string, field: keyof Task, value: any) => void;
+  updateTask: <K extends keyof Task>(taskId: string, field: K, value: Task[K]) => void;
   deleteTask: (taskId: string) => void;
+  isBatchMode: boolean;
+  isSelected: boolean;
+  toggleSelection: (taskId: string) => void;
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({ 
@@ -19,8 +67,10 @@ const TaskCard: React.FC<TaskCardProps> = ({
   config, 
   minimizedTasks, 
   toggleTaskMinimize, 
-  updateTask, 
-  deleteTask 
+  updateTask,
+  isBatchMode,
+  isSelected,
+  toggleSelection
 }) => {
   // 根据任务状态获取颜色
   const getStatusColor = () => {
@@ -51,56 +101,103 @@ const TaskCard: React.FC<TaskCardProps> = ({
     <div 
       key={task.id} 
       style={{ 
-        backgroundColor: '#ffffff', 
-        borderRadius: '12px', 
-        padding: isMinimized ? '10px 20px' : '28px', 
-        borderLeft: `4px solid ${statusColor}`,
-        transition: 'all 0.35s ease-in-out',
-        boxShadow: isMinimized ? '0 4px 12px rgba(0,0,0,0.06)' : '0 10px 24px rgba(0,0,0,0.06)',
-        border: `1px solid ${isMinimized ? `${config.color}30` : '#e8e8e8'}`,
-        overflow: 'hidden',
-        position: 'relative',
-        background: '#ffffff',
-        cursor: 'pointer'
-      }}
+          backgroundColor: '#ffffff', 
+          borderRadius: '12px', 
+          padding: isMinimized ? '10px 20px' : '28px', 
+          borderLeft: `4px solid ${statusColor}`,
+          transition: 'all 0.35s ease-in-out',
+          boxShadow: isBatchMode ? (isSelected ? `0 0 0 2px ${config.color}20` : '0 4px 12px rgba(0,0,0,0.06)') : (isMinimized ? '0 4px 12px rgba(0,0,0,0.06)' : '0 10px 24px rgba(0,0,0,0.06)'),
+          border: `2px solid ${isBatchMode ? (isSelected ? config.color : '#e8e8e8') : (isMinimized ? `${config.color}30` : '#e8e8e8')}`,
+          overflow: 'hidden',
+          position: 'relative',
+          background: isBatchMode && isSelected ? `${config.color}08` : '#ffffff',
+          cursor: isBatchMode ? 'default' : 'pointer',
+          width: '100%', // 确保宽度相同
+          height: isMinimized ? '48px' : 'auto', // 最小化时固定高度
+          minHeight: isMinimized ? '48px' : 'auto', // 确保高度一致
+          boxSizing: 'border-box' // 确保padding不影响总宽度
+        }}
       onMouseEnter={(e) => {
-        if (isMinimized) {
-          (e.currentTarget as HTMLElement).style.borderColor = config.color;
-          (e.currentTarget as HTMLElement).style.boxShadow = `0 4px 16px rgba(0,0,0,0.1)`;
-        } else {
-          (e.currentTarget as HTMLElement).style.boxShadow = '0 16px 48px rgba(0,0,0,0.15)';
-          (e.currentTarget as HTMLElement).style.transform = 'translateY(-6px) scale(1.01)';
+        if (!isBatchMode) {
+          if (isMinimized) {
+            (e.currentTarget as HTMLElement).style.borderColor = config.color;
+            (e.currentTarget as HTMLElement).style.boxShadow = `0 4px 16px rgba(0,0,0,0.1)`;
+          } else {
+            (e.currentTarget as HTMLElement).style.boxShadow = '0 16px 48px rgba(0,0,0,0.15)';
+            (e.currentTarget as HTMLElement).style.transform = 'translateY(-6px) scale(1.01)';
+          }
         }
       }}
       onMouseLeave={(e) => {
-        if (isMinimized) {
-          (e.currentTarget as HTMLElement).style.borderColor = `${config.color}30`;
-          (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 12px rgba(0,0,0,0.06)';
-        } else {
-          (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 32px rgba(0,0,0,0.08)';
-          (e.currentTarget as HTMLElement).style.transform = 'translateY(0) scale(1)';
+        if (!isBatchMode) {
+          if (isMinimized) {
+            (e.currentTarget as HTMLElement).style.borderColor = `${config.color}30`;
+            (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 12px rgba(0,0,0,0.06)';
+          } else {
+            (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 32px rgba(0,0,0,0.08)';
+            (e.currentTarget as HTMLElement).style.transform = 'translateY(0) scale(1)';
+          }
         }
       }}
-      onDoubleClick={() => toggleTaskMinimize(task.id)}
+      onClick={() => {
+        if (isBatchMode) {
+          toggleSelection(task.id);
+        }
+      }}
+      onDoubleClick={() => {
+        if (!isBatchMode) {
+          toggleTaskMinimize(task.id);
+        }
+      }}
     >
       {/* 最小化状态：一行显示 */}
       {isMinimized ? (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+          {/* 批量选择复选框 */}
+          {isBatchMode && (
+            <div 
+              style={{ 
+                width: '18px', 
+                height: '18px', 
+                borderRadius: '4px',
+                border: `2px solid ${isSelected ? config.color : '#d9d9d9'}`,
+                backgroundColor: isSelected ? config.color : '#ffffff',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleSelection(task.id);
+              }}
+            >
+              {isSelected && (
+                <div style={{ 
+                  width: '10px', 
+                  height: '10px', 
+                  backgroundColor: '#ffffff',
+                  borderRadius: '2px'
+                }} />
+              )}
+            </div>
+          )}
           {/* 任务名称和优先级 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: styles.spacing.sm, flex: 1, minWidth: 0 }}>
             {/* 优先级指示器 */}
             <div style={{ 
-              width: '10px', 
-              height: '10px', 
+              width: '12px', 
+              height: '12px', 
               borderRadius: '50%', 
               backgroundColor: getPriorityColor(),
-              boxShadow: `0 0 0 3px ${getPriorityColor()}15`
+              boxShadow: `0 0 0 2px ${getPriorityColor()}20`
             }} />
             {/* 任务名称 */}
             <span style={{ 
-              fontSize: '0.95rem', 
-              fontWeight: '500', 
-              color: '#262626',
+              fontSize: styles.fontSize.sm, 
+              fontWeight: styles.fontWeight.medium, 
+              color: styles.colors.black,
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis'
@@ -109,14 +206,20 @@ const TaskCard: React.FC<TaskCardProps> = ({
             </span>
           </div>
           
-          {/* 任务日期（如果有的话） */}
-          {task.dueDate && (
+          {/* 任务日期范围 */}
+          {(task.startDate || task.endDate) && (
             <span style={{ 
-              fontSize: '0.85rem', 
-              color: '#8c8c8c',
-              whiteSpace: 'nowrap'
+              fontSize: styles.fontSize.xs, 
+              color: statusColor,
+              whiteSpace: 'nowrap',
+              backgroundColor: `${statusColor}08`,
+              padding: `${styles.spacing.xs} ${styles.spacing.sm}`,
+              borderRadius: styles.borderRadius.md,
+              border: `1px solid ${statusColor}15`,
+              fontWeight: styles.fontWeight.medium
             }}>
-              {task.dueDate}
+              {task.startDate && task.endDate ? `${dayjs(task.startDate).format('YYYY-MM-DD')} - ${dayjs(task.endDate).format('YYYY-MM-DD')}` : 
+               task.startDate ? `开始: ${dayjs(task.startDate).format('YYYY-MM-DD')}` : `结束: ${dayjs(task.endDate).format('YYYY-MM-DD')}`}
             </span>
           )}
           
@@ -124,15 +227,20 @@ const TaskCard: React.FC<TaskCardProps> = ({
           <div style={{ minWidth: '100px' }}>
             <Select
               value={task.status}
-              onChange={(value) => updateTask(task.id, 'status', value)}
+              onChange={(value) => updateTask(task.id, 'status', value as Task['status'])}
               style={{ 
                 width: '100%',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '0.85rem',
-                fontWeight: '500'
+                borderRadius: styles.borderRadius.sm,
+                fontSize: styles.fontSize.xs,
+                fontWeight: styles.fontWeight.medium
               }}
-              dropdownStyle={{ borderRadius: '10px', border: 'none', boxShadow: '0 12px 48px rgba(0,0,0,0.15)' }}
+              dropdownStyle={{
+                borderRadius: styles.borderRadius.md,
+                border: `1px solid ${styles.colors.lightGray}`,
+                boxShadow: styles.boxShadow.medium,
+                padding: `${styles.spacing.sm} 0`
+              }}
+
             >
               <Select.Option value="not-started">未开始</Select.Option>
               <Select.Option value="in-progress">进行中</Select.Option>
@@ -143,24 +251,57 @@ const TaskCard: React.FC<TaskCardProps> = ({
       ) : (
         /* 完整状态：详细显示 */
         <>
+          {/* 批量选择复选框 */}
+          {isBatchMode && (
+            <div 
+              style={{ 
+                position: 'absolute',
+                top: '12px',
+                right: '12px',
+                width: '20px', 
+                height: '20px', 
+                borderRadius: '4px',
+                border: `2px solid ${isSelected ? config.color : '#d9d9d9'}`,
+                backgroundColor: isSelected ? config.color : '#ffffff',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleSelection(task.id);
+              }}
+            >
+              {isSelected && (
+                <div style={{ 
+                  width: '12px', 
+                  height: '12px', 
+                  backgroundColor: '#ffffff',
+                  borderRadius: '2px'
+                }} />
+              )}
+            </div>
+          )}
           {/* 任务头部信息 */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: styles.spacing.md }}>
             {/* 优先级指示器 */}
             <div style={{ 
               display: 'flex', 
               alignItems: 'center', 
-              gap: '8px'
+              gap: styles.spacing.sm
             }}>
               <div style={{ 
-                width: '10px', 
-                height: '10px', 
+                width: '12px', 
+                height: '12px', 
                 borderRadius: '50%', 
                 backgroundColor: getPriorityColor(),
                 boxShadow: `0 0 0 3px ${getPriorityColor()}15`
               }} />
               <span style={{ 
-                fontSize: '0.85rem', 
-                fontWeight: '600', 
+                fontSize: styles.fontSize.sm, 
+                fontWeight: styles.fontWeight.semiBold, 
                 color: getPriorityColor()
               }}>
                 {task.priority === 'high' ? '高优先级' : task.priority === 'medium' ? '中优先级' : '低优先级'}
@@ -173,28 +314,27 @@ const TaskCard: React.FC<TaskCardProps> = ({
               borderRadius: '20px',
               backgroundColor: `${statusColor}15`,
               color: statusColor,
-              fontSize: '0.85rem',
-              fontWeight: '600',
+              fontSize: styles.fontSize.sm,
+              fontWeight: styles.fontWeight.semiBold,
               textAlign: 'center',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px'
+              transition: 'all 0.3s ease'
             }}>
               {task.status === 'completed' ? '已完成' : 
                task.status === 'in-progress' ? '进行中' : '未开始'}
             </div>
           </div>
           
-          <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', alignItems: 'flex-start', padding: '0' }}>
+          <div style={{ display: 'flex', gap: styles.spacing.lg, alignItems: 'flex-start' }}>
             {/* 任务主要信息 */}
-            <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
               {/* 任务名称 */}
-              <div style={{ marginBottom: '16px' }}>
+              <div style={{ marginBottom: styles.spacing.md }}>
                 <label style={{ 
-                  fontSize: '0.75rem', 
-                  color: '#8c8c8c', 
-                  fontWeight: '600', 
+                  fontSize: styles.fontSize.xs, 
+                  color: styles.colors.mediumGray, 
+                  fontWeight: styles.fontWeight.semiBold, 
                   display: 'block', 
-                  marginBottom: '8px',
+                  marginBottom: styles.spacing.sm,
                   textTransform: 'uppercase',
                   letterSpacing: '0.5px'
                 }}>任务名称</label>
@@ -204,22 +344,23 @@ const TaskCard: React.FC<TaskCardProps> = ({
                   style={{
                     width: '100%',
                     padding: '12px 16px',
-                    border: '2px solid #f5f5f5',
-                    borderRadius: '10px',
-                    fontSize: '1rem',
-                    fontWeight: '500',
+                    border: `1px solid ${styles.colors.lightGray}`,
+                    borderRadius: styles.borderRadius.md,
+                    fontSize: styles.fontSize.md,
+                    fontWeight: styles.fontWeight.medium,
                     transition: 'all 0.3s ease',
-                    backgroundColor: '#ffffff',
+                    backgroundColor: styles.colors.white,
                     outline: 'none',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                    boxShadow: styles.boxShadow.light,
+
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = config.color;
-                    e.target.style.boxShadow = `0 0 0 3px ${config.color}15`;
+                    e.target.style.borderColor = styles.colors.primary;
+                    e.target.style.boxShadow = `0 0 0 2px ${styles.colors.primary}20`;
                   }}
                   onBlur={(e) => {
-                    e.target.style.borderColor = '#f5f5f5';
-                    e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
+                    e.target.style.borderColor = styles.colors.lightGray;
+                    e.target.style.boxShadow = styles.boxShadow.light;
                   }}
                 />
               </div>
@@ -227,11 +368,11 @@ const TaskCard: React.FC<TaskCardProps> = ({
               {/* 任务描述 */}
               <div>
                 <label style={{ 
-                  fontSize: '0.75rem', 
-                  color: '#8c8c8c', 
-                  fontWeight: '600', 
+                  fontSize: styles.fontSize.xs, 
+                  color: styles.colors.mediumGray, 
+                  fontWeight: styles.fontWeight.semiBold, 
                   display: 'block', 
-                  marginBottom: '8px',
+                  marginBottom: styles.spacing.sm,
                   textTransform: 'uppercase',
                   letterSpacing: '0.5px'
                 }}>任务描述</label>
@@ -240,79 +381,78 @@ const TaskCard: React.FC<TaskCardProps> = ({
                   onChange={(e) => updateTask(task.id, 'description', e.target.value)} 
                   style={{
                     width: '100%',
-                    minHeight: '100px',
+                    minHeight: '173px', // magic
                     padding: '12px 16px',
-                    border: '2px solid #f5f5f5',
-                    borderRadius: '10px',
-                    fontSize: '0.95rem',
+                    border: `1px solid ${styles.colors.lightGray}`,
+                    borderRadius: styles.borderRadius.md,
+                    fontSize: styles.fontSize.sm,
                     lineHeight: '1.6',
                     resize: 'vertical',
                     transition: 'all 0.3s ease',
-                    backgroundColor: '#ffffff',
+                    backgroundColor: styles.colors.white,
                     outline: 'none',
                     fontFamily: 'inherit',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                    boxShadow: styles.boxShadow.light
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = config.color;
-                    e.target.style.boxShadow = `0 0 0 3px ${config.color}15`;
+                    e.target.style.borderColor = styles.colors.primary;
+                    e.target.style.boxShadow = `0 0 0 2px ${styles.colors.primary}20`;
                   }}
                   onBlur={(e) => {
-                    e.target.style.borderColor = '#f5f5f5';
-                    e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
+                    e.target.style.borderColor = styles.colors.lightGray;
+                    e.target.style.boxShadow = styles.boxShadow.light;
                   }}
                 />
               </div>
             </div>
             
             {/* 任务属性面板 */}
-            <div style={{ width: '220px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: styles.spacing.md, width: '320px' }}>
               {/* 状态 */}
               <div>
                 <label style={{ 
-                  fontSize: '0.75rem', 
-                  color: '#8c8c8c', 
-                  fontWeight: '600', 
+                  fontSize: styles.fontSize.xs, 
+                  color: styles.colors.mediumGray, 
+                  fontWeight: styles.fontWeight.semiBold, 
                   display: 'block', 
-                  marginBottom: '8px',
+                  marginBottom: styles.spacing.sm,
                   textTransform: 'uppercase',
                   letterSpacing: '0.5px'
                 }}>状态</label>
-                <div style={{ 
-                  position: 'relative',
-                  borderRadius: '10px',
-                  overflow: 'hidden',
-                  border: '2px solid #f5f5f5',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                  transition: 'all 0.3s ease'
-                }}>
-                  <Select
-                    value={task.status}
-                    onChange={(value) => updateTask(task.id, 'status', value)}
-                    style={{ 
-                      width: '100%',
-                      border: 'none',
-                      borderRadius: '10px',
-                      fontSize: '0.95rem',
-                      fontWeight: '500'
-                    }}
-                    dropdownStyle={{ borderRadius: '10px', border: 'none', boxShadow: '0 12px 48px rgba(0,0,0,0.15)' }}
-                  >
-                    <Select.Option value="not-started">未开始</Select.Option>
-                    <Select.Option value="in-progress">进行中</Select.Option>
-                    <Select.Option value="completed">已完成</Select.Option>
-                  </Select>
-                </div>
+                <Select
+                  value={task.status}
+                  onChange={(value) => updateTask(task.id, 'status', value as Task['status'])}
+                  style={{ 
+                    width: '100%',
+                    borderRadius: styles.borderRadius.md,
+                    fontSize: styles.fontSize.sm,
+                    fontWeight: styles.fontWeight.medium,
+                    border: `1px solid ${styles.colors.lightGray}`,
+                    boxShadow: styles.boxShadow.light,
+                    
+                  }}
+                  dropdownStyle={{
+                    borderRadius: styles.borderRadius.md,
+                    border: `1px solid ${styles.colors.lightGray}`,
+                    boxShadow: styles.boxShadow.medium,
+                    padding: `${styles.spacing.sm} 0`
+                  }}
+
+                >
+                  <Select.Option value="not-started">未开始</Select.Option>
+                  <Select.Option value="in-progress">进行中</Select.Option>
+                  <Select.Option value="completed">已完成</Select.Option>
+                </Select>
               </div>
               
               {/* 分数 */}
               <div>
                 <label style={{ 
-                  fontSize: '0.75rem', 
-                  color: '#8c8c8c', 
-                  fontWeight: '600', 
+                  fontSize: styles.fontSize.xs, 
+                  color: styles.colors.mediumGray, 
+                  fontWeight: styles.fontWeight.semiBold, 
                   display: 'block', 
-                  marginBottom: '8px',
+                  marginBottom: styles.spacing.sm,
                   textTransform: 'uppercase',
                   letterSpacing: '0.5px'
                 }}>分数</label>
@@ -323,22 +463,22 @@ const TaskCard: React.FC<TaskCardProps> = ({
                   style={{
                     width: '100%',
                     padding: '12px 16px',
-                    border: '2px solid #f5f5f5',
-                    borderRadius: '10px',
-                    fontSize: '0.95rem',
-                    fontWeight: '500',
+                    border: `1px solid ${styles.colors.lightGray}`,
+                    borderRadius: styles.borderRadius.md,
+                    fontSize: styles.fontSize.sm,
+                    fontWeight: styles.fontWeight.medium,
                     transition: 'all 0.3s ease',
-                    backgroundColor: '#ffffff',
+                    backgroundColor: styles.colors.white,
                     outline: 'none',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                    boxShadow: styles.boxShadow.light
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = config.color;
-                    e.target.style.boxShadow = `0 0 0 3px ${config.color}15`;
+                    e.target.style.borderColor = styles.colors.primary;
+                    e.target.style.boxShadow = `0 0 0 2px ${styles.colors.primary}20`;
                   }}
                   onBlur={(e) => {
-                    e.target.style.borderColor = '#f5f5f5';
-                    e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
+                    e.target.style.borderColor = styles.colors.lightGray;
+                    e.target.style.boxShadow = styles.boxShadow.light;
                   }}
                 />
               </div>
@@ -346,71 +486,124 @@ const TaskCard: React.FC<TaskCardProps> = ({
               {/* 优先级 */}
               <div>
                 <label style={{ 
-                  fontSize: '0.75rem', 
-                  color: '#8c8c8c', 
-                  fontWeight: '600', 
+                  fontSize: styles.fontSize.xs, 
+                  color: styles.colors.mediumGray, 
+                  fontWeight: styles.fontWeight.semiBold, 
                   display: 'block', 
-                  marginBottom: '8px',
+                  marginBottom: styles.spacing.sm,
                   textTransform: 'uppercase',
                   letterSpacing: '0.5px'
                 }}>优先级</label>
-                <div style={{ 
-                  position: 'relative',
-                  borderRadius: '10px',
-                  overflow: 'hidden',
-                  border: '2px solid #f5f5f5',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                  transition: 'all 0.3s ease'
-                }}>
-                  <Select
-                    value={task.priority}
-                    onChange={(value) => updateTask(task.id, 'priority', value)}
-                    style={{ 
-                      width: '100%',
-                      border: 'none',
-                      borderRadius: '10px',
-                      fontSize: '0.95rem',
-                      fontWeight: '500'
-                    }}
-                    dropdownStyle={{ borderRadius: '10px', border: 'none', boxShadow: '0 12px 48px rgba(0,0,0,0.15)' }}
-                  >
-                    <Select.Option value="low">低</Select.Option>
-                    <Select.Option value="medium">中</Select.Option>
-                    <Select.Option value="high">高</Select.Option>
-                  </Select>
-                </div>
+                <Select
+                  value={task.priority}
+                  onChange={(value) => updateTask(task.id, 'priority', value as Task['priority'])}
+                  style={{ 
+                    width: '100%',
+                    borderRadius: styles.borderRadius.md,
+                    fontSize: styles.fontSize.sm,
+                    fontWeight: styles.fontWeight.medium,
+                    border: `1px solid ${styles.colors.lightGray}`,
+                    boxShadow: styles.boxShadow.light,
+                    
+                  }}
+                  dropdownStyle={{
+                    borderRadius: styles.borderRadius.md,
+                    border: `1px solid ${styles.colors.lightGray}`,
+                    boxShadow: styles.boxShadow.medium,
+                    padding: `${styles.spacing.sm} 0`
+                  }}
+
+                >
+                  <Select.Option value="low">低</Select.Option>
+                  <Select.Option value="medium">中</Select.Option>
+                  <Select.Option value="high">高</Select.Option>
+                </Select>
               </div>
               
-              {/* 删除按钮 */}
-              <button 
-                onClick={() => deleteTask(task.id)} 
-                style={{ 
-                  backgroundColor: '#ff4d4f', 
-                  color: '#fff', 
-                  border: 'none', 
-                  borderRadius: '10px', 
-                  padding: '10px 16px',
-                  fontSize: '0.85rem',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px'
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.backgroundColor = '#ff7875';
-                  (e.currentTarget as HTMLElement).style.transform = 'scale(1.05)';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.backgroundColor = '#ff4d4f';
-                  (e.currentTarget as HTMLElement).style.transform = 'scale(1)';
-                }}
-              >
-                <Trash size={16} />
-                删除
-              </button>
+              {/* 日期范围 */}
+              <div style={{ display: 'flex', gap: styles.spacing.sm, alignItems: 'flex-start', width: '100%' }}>
+                {/* 开始日期 */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <label style={{ 
+                    fontSize: styles.fontSize.xs, 
+                    color: styles.colors.mediumGray, 
+                    fontWeight: styles.fontWeight.semiBold, 
+                    display: 'block', 
+                    marginBottom: styles.spacing.xs,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}>开始日期</label>
+                  <DatePicker
+                    value={task.startDate ? dayjs(task.startDate) : undefined}
+                    onChange={(value) => {
+                      const dateStr = value ? value.format('YYYY-MM-DD') : undefined;
+                      updateTask(task.id, 'startDate', dateStr);
+                    }}
+                    onBlur={(e) => {
+                      // 确保失焦时数据已保存
+                      const input = e.target as HTMLInputElement;
+                      if (input.value) {
+                        const dateStr = dayjs(input.value).format('YYYY-MM-DD');
+                        updateTask(task.id, 'startDate', dateStr);
+                      }
+                    }}
+                    style={{ 
+                      width: '100%',
+                      borderRadius: styles.borderRadius.md,
+                      fontSize: styles.fontSize.sm,
+                      border: `1px solid ${styles.colors.lightGray}`,
+                      boxShadow: styles.boxShadow.light,
+                      padding: '6px 8px',
+                      height: '32px'
+                    }}
+                    size="small"
+                  />
+                </div>
+                
+                {/* 结束日期 */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <label style={{ 
+                    fontSize: styles.fontSize.xs, 
+                    color: styles.colors.mediumGray, 
+                    fontWeight: styles.fontWeight.semiBold, 
+                    display: 'block', 
+                    marginBottom: styles.spacing.xs,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}>结束日期</label>
+                  <DatePicker
+                    value={task.endDate ? dayjs(task.endDate) : undefined}
+                    onChange={(value) => {
+                      const dateStr = value ? value.format('YYYY-MM-DD') : undefined;
+                      updateTask(task.id, 'endDate', dateStr);
+                    }}
+                    onBlur={(e) => {
+                      // 确保失焦时数据已保存
+                      const input = e.target as HTMLInputElement;
+                      if (input.value) {
+                        const dateStr = dayjs(input.value).format('YYYY-MM-DD');
+                        updateTask(task.id, 'endDate', dateStr);
+                      }
+                    }}
+                    style={{ 
+                      width: '100%',
+                      borderRadius: styles.borderRadius.md,
+                      fontSize: styles.fontSize.sm,
+                      border: `1px solid ${styles.colors.lightGray}`,
+                      boxShadow: styles.boxShadow.light,
+                      padding: '6px 8px',
+                      height: '32px'
+                    }}
+                    size="small"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </>

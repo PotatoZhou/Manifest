@@ -40,7 +40,7 @@ const YearsPage: React.FC<YearsPageProps> = ({ currentYear, onYearChange, darkMo
   };
 
   return (
-    <div id="years-page" className="page">
+    <div id="years-page" className="page" style={{ padding: '20px 30px' }}>
       <div className="page-header">
         <h2><Calendar size={18} style={{ marginRight: '8px' }} /> 历年绩效对比</h2>
         <YearSelector currentYear={currentYear} onChange={onYearChange} />
@@ -62,7 +62,7 @@ const YearsPage: React.FC<YearsPageProps> = ({ currentYear, onYearChange, darkMo
       </div>
 
       {/* 年度数据表格 */}
-      <div className="card">
+      <div className="card" >
         <div className="card-header">
           <div className="card-icon" style={{ background: 'rgba(103, 58, 183, 0.1)', color: '#673ab7' }}>
             <BarChart size={18} />

@@ -80,6 +80,8 @@ const AccountSelectPage: React.FC<AccountSelectPageProps> = ({ onAccountSelect, 
           align-items: center;
           background-color: #ffffff;
           z-index: 1000;
+          border-radius: 12px;
+          overflow: hidden;
         }
 
         .account-select-content {

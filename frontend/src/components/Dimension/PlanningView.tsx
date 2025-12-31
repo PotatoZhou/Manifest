@@ -29,7 +29,7 @@ const PlanningView: React.FC<PlanningViewProps> = ({
         backgroundColor: '#fff',
         borderRadius: '12px',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-        padding: '24px',
+        padding: '16px',
         transition: 'all 0.3s ease'
       }}>
         <h3 style={{

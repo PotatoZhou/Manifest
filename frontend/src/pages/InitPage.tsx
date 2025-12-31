@@ -158,6 +158,8 @@ const InitPage: React.FC<InitPageProps> = ({ onAccountCreated }) => {
           align-items: center;
           background-color: #ffffff;
           z-index: 1000;
+          border-radius: 12px;
+          overflow: hidden;
         }
 
         .init-page-content {
