@@ -298,3 +298,75 @@
 .dark .btn-add-task:hover {
     background: #7c3aed;
 }
+
+/* 设置页面暗色模式样式 */
+.dark .settings-container {
+    background-color: #1e293b;
+}
+
+.dark .setting-item {
+    background-color: #1e293b;
+    border: 1px solid #334155;
+}
+
+.dark .setting-item:hover {
+    background-color: #334155;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dark .setting-info h4 {
+    color: #f8fafc;
+}
+
+.dark .setting-info p {
+    color: #94a3b8;
+}
+
+/* 数据管理暗色模式样式 */
+.dark .data-management-container {
+    background-color: #1e293b;
+}
+
+.dark .data-action {
+    background-color: #1e293b;
+    border: 1px solid #334155;
+}
+
+.dark .data-action:hover {
+    background-color: #334155;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark .data-action.danger {
+    border-left: 4px solid #ef4444;
+}
+
+.dark .data-action h4 {
+    color: #f8fafc;
+}
+
+.dark .data-action p {
+    color: #94a3b8;
+}
+
+/* 关于系统暗色模式样式 */
+.dark .about-container {
+    background-color: #1e293b;
+}
+
+.dark .about-item {
+    background-color: #1e293b;
+    border: 1px solid #334155;
+}
+
+.dark .about-item:hover {
+    background-color: #334155;
+}
+
+.dark .about-item h4 {
+    color: #f8fafc;
+}
+
+.dark .about-item p {
+    color: #94a3b8;
+}

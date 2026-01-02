@@ -20,6 +20,7 @@ interface DashboardPageProps {
 const DashboardPage: React.FC<DashboardPageProps> = ({ currentYear, onYearChange, darkMode, toggleDarkMode }) => {
   // 获取所有维度配置
   const allDimensions = performanceSystem.getAllDimensionConfigs();
+  console.log('allDimensions------->', allDimensions);
   
   // 使用单个useRef存储canvas元素
   const dreamChartRef = useRef<HTMLCanvasElement>(null);
@@ -41,17 +42,6 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ currentYear, onYearChange
   
   // 日历相关状态
   const [calendarValue, setCalendarValue] = useState(dayjs(`${currentYear}-01-01`));
-  
-  // 根据维度key获取对应的颜色
-  const getDimensionColor = (dimensionKey: string): string => {
-    const colors: Record<string, string> = {
-      dream: '#9c27b0',
-      health: '#4caf50',
-      work: '#2196f3',
-      mind: '#ff9800'
-    };
-    return colors[dimensionKey] || '#673ab7'; // 默认紫色
-  };
   
   // 根据维度key获取对应的图标
   const getDimensionIcon = (dimensionKey: string) => {
@@ -214,6 +204,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ currentYear, onYearChange
       <div className="dashboard-cards">
         {allDimensions.map(dimension => {
           const dimensionKey = dimension.key;
+          const dimensionTitle = dimension.title || getDimensionName(dimensionKey);
+          const dimensionColor = dimension.color
           const dimensionData = yearData?.dimensions?.[dimensionKey];
           return (
             <div key={dimensionKey} className={`card ${dimensionKey}`}>
@@ -222,12 +214,12 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ currentYear, onYearChange
                   {getDimensionIcon(dimensionKey)}
                 </div>
                 <div>
-                  <div className="card-title">{getDimensionName(dimensionKey)}</div>
+                  <div className="card-title">{dimensionTitle}</div>
                   <div className="card-subtitle">年度目标完成情况</div>
                 </div>
               </div>
               <div style={{ textAlign: 'center', padding: '15px 0' }}>
-                <div style={{ fontSize: '2rem', fontWeight: '700', color: getDimensionColor(dimensionKey), marginBottom: '8px' }}>
+                <div style={{ fontSize: '2rem', fontWeight: '700', color: dimensionColor, marginBottom: '8px' }}>
                   {dimensionData?.progress || 0}%
                 </div>
                 <div style={{ marginBottom: '15px' }}>
@@ -440,7 +432,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ currentYear, onYearChange
             {allDimensions.map(dimension => {
               const dimensionKey = dimension.key;
               const dimData = yearData.dimensions[dimensionKey];
-              const dimensionColor = getDimensionColor(dimensionKey);
+              const dimensionColor = dimension.color;
               return (
                 <div key={dimensionKey} className="dimension-progress-card">
                   <h5>{getDimensionName(dimensionKey)}</h5>

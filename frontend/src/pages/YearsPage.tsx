@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Calendar, Save, FileSpreadsheet, Sun, Moon, BarChart, Eye, LineChart, Scale } from 'lucide-react';
 import { performanceSystem } from '../utils/PerformanceSystem';
 import Button from '../components/Button/Button';
 import YearSelector from '../components/YearSelector/YearSelector';
+import Chart from 'chart.js/auto';
 
 interface YearsPageProps {
   currentYear: string;
@@ -38,6 +39,151 @@ const YearsPage: React.FC<YearsPageProps> = ({ currentYear, onYearChange, darkMo
     const totalScore = dimensions.reduce((sum, dimension) => sum + (yearData.dimensions?.[dimension]?.totalScore || 0), 0);
     return Math.round(totalScore / dimensions.length);
   };
+
+  // 初始化图表
+  useEffect(() => {
+    // 销毁旧图表实例
+    const destroyCharts = () => {
+      const yearTrendChart = Chart.getChart('year-trend-chart');
+      if (yearTrendChart) yearTrendChart.destroy();
+      
+      const dimensionChart = Chart.getChart('dimension-comparison-chart');
+      if (dimensionChart) dimensionChart.destroy();
+    };
+
+    // 初始化年度趋势图表
+    const initYearTrendChart = () => {
+      const ctx = document.getElementById('year-trend-chart') as HTMLCanvasElement;
+      if (!ctx) return;
+
+      const yearsSorted = [...years].sort((a, b) => parseInt(a) - parseInt(b));
+      const yearScores = yearsSorted.map(year => {
+        const yearData = allData[year];
+        return calculateYearAverage(yearData || { dimensions: {} });
+      });
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: yearsSorted,
+          datasets: [{
+            label: '年度平均分',
+            data: yearScores,
+            borderColor: '#3498db',
+            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+            tension: 0.3,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: '年度绩效趋势'
+            },
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              title: {
+                display: true,
+                text: '分数'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: '年份'
+              }
+            }
+          }
+        }
+      });
+    };
+
+    // 初始化维度对比图表
+    const initDimensionChart = () => {
+      const ctx = document.getElementById('dimension-comparison-chart') as HTMLCanvasElement;
+      if (!ctx) return;
+
+      const currentYearData = allData[currentYear];
+      if (!currentYearData) return;
+
+      const dimensions = ['dream', 'health', 'work', 'mind'];
+      const dimensionNames = {
+        dream: '梦想维度',
+        health: '健康维度',
+        work: '工作维度',
+        mind: '心理维度'
+      };
+      const dimensionColors = {
+        dream: '#ff6384',
+        health: '#36a2eb',
+        work: '#4bc0c0',
+        mind: '#9966ff'
+      };
+
+      const dimensionScores = dimensions.map(dimension => {
+        return currentYearData.dimensions?.[dimension]?.totalScore || 0;
+      });
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: dimensions.map(d => dimensionNames[d as keyof typeof dimensionNames]),
+          datasets: [{
+            label: '维度得分',
+            data: dimensionScores,
+            backgroundColor: dimensions.map(d => dimensionColors[d as keyof typeof dimensionColors]),
+            borderRadius: 5
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: `${currentYear}年各维度表现对比`
+            },
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              title: {
+                display: true,
+                text: '分数'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: '维度'
+              }
+            }
+          }
+        }
+      });
+    };
+
+    // 执行初始化
+    destroyCharts();
+    initYearTrendChart();
+    initDimensionChart();
+
+    // 组件卸载时销毁图表
+    return () => {
+      destroyCharts();
+    };
+  }, [years, allData, currentYear]);
 
   return (
     <div id="years-page" className="page" style={{ padding: '20px 30px' }}>

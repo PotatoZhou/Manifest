@@ -4,6 +4,8 @@ import {main} from '../models';
 
 export function AddTask(arg1:main.Task):Promise<void>;
 
+export function CheckUpdate():Promise<main.CheckUpdateResult>;
+
 export function DeleteAnnualData(arg1:string):Promise<void>;
 
 export function DeleteTask(arg1:string):Promise<void>;
@@ -21,6 +23,8 @@ export function GetLastUsedAccount():Promise<main.Account>;
 export function Greet(arg1:string):Promise<string>;
 
 export function NewAccount(arg1:string,arg2:string):Promise<main.Account>;
+
+export function OpenDownloadURL(arg1:string):Promise<void>;
 
 export function ResetAllData():Promise<void>;
 

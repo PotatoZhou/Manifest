@@ -6,6 +6,7 @@ toolchain go1.24.11
 
 require (
 	github.com/google/uuid v1.6.0
+	github.com/hashicorp/go-version v1.8.0
 	github.com/wailsapp/wails/v2 v2.11.0
 	modernc.org/sqlite v1.42.2
 )

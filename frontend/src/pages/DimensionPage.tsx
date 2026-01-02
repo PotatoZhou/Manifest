@@ -54,6 +54,7 @@ const DimensionPage: React.FC<DimensionPageProps> = ({ dimensionKey, currentYear
   
   // 获取所有维度配置
   const [allDimensions, setAllDimensions] = useState(performanceSystem.getAllDimensionConfigs());
+  console.log('allDimension_page------->', allDimensions);
 
   // --- 数据获取 ---
   const config = performanceSystem.getDimensionConfig(selectedDimension) || {
@@ -206,6 +207,21 @@ const DimensionPage: React.FC<DimensionPageProps> = ({ dimensionKey, currentYear
     }
   };
 
+  // 删除维度
+  const handleDeleteDimension = async (dimensionKey: string) => {
+    const success = await performanceSystem.deleteDimension(dimensionKey);
+    if (success) {
+      // 如果删除的是当前选中的维度，切换到第一个维度
+      const allDims = performanceSystem.getAllDimensionConfigs();
+      if (selectedDimension === dimensionKey && allDims.length > 0) {
+        setSelectedDimension(allDims[0].key);
+      }
+      // 更新数据
+      setYearData(performanceSystem.getCurrentYearData());
+      setAllDimensions(allDims);
+    }
+  };
+
 
  const styles = {
     container: {
@@ -262,6 +278,7 @@ const DimensionPage: React.FC<DimensionPageProps> = ({ dimensionKey, currentYear
           newDimensionColor={newDimensionColor}
           setNewDimensionColor={setNewDimensionColor}
           handleAddDimension={handleAddDimension}
+          onDeleteDimension={handleDeleteDimension}
         />
       </div>
 

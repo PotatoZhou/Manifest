@@ -6,6 +6,10 @@ export function AddTask(arg1) {
   return window['go']['main']['App']['AddTask'](arg1);
 }
 
+export function CheckUpdate() {
+  return window['go']['main']['App']['CheckUpdate']();
+}
+
 export function DeleteAnnualData(arg1) {
   return window['go']['main']['App']['DeleteAnnualData'](arg1);
 }
@@ -40,6 +44,10 @@ export function Greet(arg1) {
 
 export function NewAccount(arg1, arg2) {
   return window['go']['main']['App']['NewAccount'](arg1, arg2);
+}
+
+export function OpenDownloadURL(arg1) {
+  return window['go']['main']['App']['OpenDownloadURL'](arg1);
 }
 
 export function ResetAllData() {

@@ -1,6 +1,29 @@
 import React from 'react';
-import { Box, Plus, Map, CheckSquare, LineChart } from 'lucide-react';
+import { Box, Plus, Map, CheckSquare, LineChart, Trash } from 'lucide-react';
 import { performanceSystem } from '../../utils/PerformanceSystem';
+
+// 自定义滚动条样式 - 隐藏滚动条但保留滚动功能
+const scrollbarStyles = `
+  /* 隐藏滚动条但保留滚动功能 */
+  .custom-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+  }
+
+  /* Chrome, Safari 和 Opera */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+`;
+
+// 添加滚动条样式到文档头部
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.type = 'text/css';
+  styleSheet.innerText = scrollbarStyles;
+  document.head.appendChild(styleSheet);
+}
 
 interface SubSidebarProps {
   activeTab: 'planning' | 'tasks' | 'analysis';
@@ -17,6 +40,7 @@ interface SubSidebarProps {
   newDimensionColor: string;
   setNewDimensionColor: (color: string) => void;
   handleAddDimension: () => void;
+  onDeleteDimension: (dimensionKey: string) => Promise<void>;
 }
 
 const months = [
@@ -38,7 +62,8 @@ const SubSidebar: React.FC<SubSidebarProps> = ({
   setNewDimensionName,
   newDimensionColor,
   setNewDimensionColor,
-  handleAddDimension
+  handleAddDimension,
+  onDeleteDimension
 }) => {
   // 获取当前维度配置
   const config = performanceSystem.getDimensionConfig(selectedDimension) || {
@@ -50,14 +75,15 @@ const SubSidebar: React.FC<SubSidebarProps> = ({
   // --- 内部样式对象 ---
   const styles = {
     subSidebar: {
-      width: '260px',
+      width: '100%',
       height: '100%',
       backgroundColor: '#fff',
       borderRight: '1px solid #e8e8e8',
       display: 'flex',
       flexDirection: 'column' as const,
       padding: '20px 0',
-      boxShadow: '2px 0 8px rgba(0,0,0,0.05)'
+      boxShadow: '2px 0 8px rgba(0,0,0,0.05)',
+      overflowX: 'hidden' // 防止横向滚动条
     },
     navItem: (isActive: boolean) => ({
       padding: '14px 24px',
@@ -102,11 +128,10 @@ const SubSidebar: React.FC<SubSidebarProps> = ({
         </div>
         
         {/* 维度列表 */}
-        <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
+        <div className="custom-scrollbar" style={{ maxHeight: '150px', overflowY: 'auto' }}>
           {allDimensions.map(dim => (
             <div
               key={dim.key}
-              onClick={() => setSelectedDimension(dim.key)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -115,18 +140,63 @@ const SubSidebar: React.FC<SubSidebarProps> = ({
                 borderRadius: '6px',
                 backgroundColor: selectedDimension === dim.key ? `${dim.color}15` : '#fff',
                 border: `2px solid ${selectedDimension === dim.key ? dim.color : 'transparent'}`,
-                cursor: 'pointer',
                 transition: 'all 0.2s'
               }}
             >
-              <div style={{ 
-                width: '12px', 
-                height: '12px', 
-                borderRadius: '50%', 
-                backgroundColor: dim.color,
-                marginRight: '8px'
-              }}></div>
-              <span style={{ fontSize: '0.85rem', color: '#595959' }}>{dim.title}</span>
+              <div 
+                onClick={() => setSelectedDimension(dim.key)}
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  flex: 1,
+                  cursor: 'pointer',
+                  padding: '4px'
+                }}
+              >
+                <div style={{ 
+                  width: '12px', 
+                  height: '12px', 
+                  borderRadius: '50%', 
+                  backgroundColor: dim.color,
+                  marginRight: '8px'
+                }}></div>
+                <span style={{ fontSize: '0.85rem', color: '#595959' }}>{dim.title}</span>
+              </div>
+              {selectedDimension === dim.key && !dim.isDefault && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log('Delete button clicked for dimension:', dim.key);
+                    if (window.confirm(`确定要删除维度 "${dim.title}" 吗？`)) {
+                      onDeleteDimension(dim.key);
+                    }
+                  }}
+                  style={{
+                    padding: '6px',
+                    backgroundColor: '#ff4d4f',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    opacity: 1,
+                    transition: 'all 0.2s',
+                    zIndex: 10,
+                    minWidth: '28px',
+                    minHeight: '28px',
+                    position: 'relative',
+                    marginLeft: '8px'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  title="删除维度"
+                >
+                  <Trash size={18} color="white" />
+                </button>
+              )}
             </div>
           ))}
         </div>

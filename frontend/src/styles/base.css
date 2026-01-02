@@ -4,15 +4,40 @@
 
 
 :root {
-    --color-dream: #9c27b0;
-    --color-health: #4caf50;
-    --color-work: #2196f3;
-    --color-mind: #ff9800;
-    --color-year: #673ab7;
-    --color-bg: #F8F9FA;
-    --color-sidebar: #F8F9FA;
+    /* 主色调：更柔和的紫色 */
+    --color-primary: #7c3aed;
+    --color-primary-light: #a78bfa;
+    --color-primary-dark: #6d28d9;
+    
+    /* 维度色彩 */
+    --color-dream: #8b5cf6;
+    --color-health: #10b981;
+    --color-work: #3b82f6;
+    --color-mind: #f59e0b;
+    --color-year: #ec4899;
+    
+    /* 中性色：更丰富的灰色层级 */
+    --color-bg: #f8fafc;
+    --color-surface: #ffffff;
     --color-card: #ffffff;
-    --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --color-text-primary: #1e293b;
+    --color-text-secondary: #64748b;
+    --color-text-tertiary: #94a3b8;
+    --color-border: #e2e8f0;
+    --color-border-light: #f1f5f9;
+    
+    /* 功能色 */
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-error: #ef4444;
+    --color-info: #3b82f6;
+    
+    /* 阴影：更有层次感的阴影 */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    
     width: 100%;
 }
 
@@ -30,13 +55,57 @@ html, body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    /* 优化行高和字间距 */
+    line-height: 1.6;
+    letter-spacing: 0.01em;
     transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* 建立字体层级 */
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+p {
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+/* 小文本 */
+.text-sm {
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+.text-xs {
+    font-size: 0.75rem;
+    line-height: 1.5;
 }
 
 body {
     background: var(--color-bg);
-    color: #333;
+    color: var(--color-text-primary);
     display: flex;
     min-height: 100vh;
 }

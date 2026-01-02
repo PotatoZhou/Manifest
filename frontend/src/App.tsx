@@ -7,8 +7,10 @@ import YearsPage from './pages/YearsPage'
 import SettingsPage from './pages/SettingsPage'
 import AccountSelectPage from './pages/AccountSelectPage'
 import InitPage from './pages/InitPage'
+import UpdateModal from './components/UpdateModal/UpdateModal'
 import { performanceSystem } from './utils/PerformanceSystem'
 import { GetAccounts, GetLastUsedAccount } from '../wailsjs/go/main/App'
+import { EventsOn } from '../wailsjs/runtime/runtime'
 import type { Account } from './utils/PerformanceSystem'
 
 // 中英文翻译对象
@@ -58,6 +60,11 @@ function App() {
   const [showAccountSelect, setShowAccountSelect] = useState<boolean>(false)
   const [showInitPage, setShowInitPage] = useState<boolean>(false)
   const [currentAccount, setCurrentAccount] = useState<Account | null>(null)
+  // 更新提醒状态
+  const [showUpdateModal, setShowUpdateModal] = useState<boolean>(false)
+  const [latestVersion, setLatestVersion] = useState<string>('')
+  const [releaseNotes, setReleaseNotes] = useState<string>('')
+  const [downloadURL, setDownloadURL] = useState<string>('')
 
   // 组件挂载后初始化性能系统和账号系统
 
@@ -96,6 +103,28 @@ function App() {
     }
 
     init()
+  }, [])
+
+  // 监听更新事件
+  useEffect(() => {
+    // 监听后端发送的更新可用事件
+    const eventId = EventsOn('updateAvailable', (result: any) => {
+      if (result.updateAvailable) {
+        setLatestVersion(result.latestVersion)
+        setReleaseNotes(result.releaseNotes)
+        setDownloadURL(result.downloadURL)
+        setShowUpdateModal(true)
+      }
+    })
+
+    // 清理函数
+    return () => {
+      // 取消事件监听
+      if (eventId) {
+        // 注意：Wails的EventsOn返回的是一个字符串ID，需要使用EventsOff来取消监听
+        // 由于当前版本的wailsjs可能没有EventsOff导出，这里暂时不实现清理
+      }
+    }
   }, [])
   
 
@@ -216,6 +245,15 @@ function App() {
           {renderCurrentPage()}
         </div>
       </div>
+
+      {/* 更新提醒模态框 */}
+      <UpdateModal
+        visible={showUpdateModal}
+        onClose={() => setShowUpdateModal(false)}
+        latestVersion={latestVersion}
+        releaseNotes={releaseNotes}
+        downloadURL={downloadURL}
+      />
     </div>
   )
 }

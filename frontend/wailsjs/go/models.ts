@@ -223,6 +223,26 @@ export namespace main {
 		}
 	}
 	
+	export class CheckUpdateResult {
+	    updateAvailable: boolean;
+	    currentVersion: string;
+	    latestVersion: string;
+	    releaseNotes: string;
+	    downloadURL: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CheckUpdateResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.updateAvailable = source["updateAvailable"];
+	        this.currentVersion = source["currentVersion"];
+	        this.latestVersion = source["latestVersion"];
+	        this.releaseNotes = source["releaseNotes"];
+	        this.downloadURL = source["downloadURL"];
+	    }
+	}
 	
 	
 	
