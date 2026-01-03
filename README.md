@@ -215,8 +215,7 @@ performance-wails/
 
 如有问题、建议或合作意向，欢迎通过以下方式联系：
 
-- **Issue Tracker**: [GitHub Issues](https://github.com/your-username/performance-wails/issues)（如果在 GitHub 上）
-- **电子邮件**: your-email@example.com
+- **Issue Tracker**: [GitHub Issues](https://github.com/PotatoZhou/Manifest/issues)
 - **讨论区**: 欢迎在项目讨论区提出问题和分享想法
 
 ## 🙏 致谢
