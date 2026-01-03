@@ -108,6 +108,7 @@ body {
     color: var(--color-text-primary);
     display: flex;
     min-height: 100vh;
+    user-select: text;
 }
 
 .app-container {

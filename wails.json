@@ -1,10 +1,10 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
-  "name": "performance-wails",
-  "outputfilename": "performance-wails",
+  "name": "Manifest",
+  "outputfilename": "Manifest",
   "frontend:install": "npm install",
   "frontend:build": "npm run build",
-  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:watcher": "vite .",
   "frontend:dev:serverUrl": "auto",
   "author": {
     "name": "gjzhou",
@@ -14,7 +14,7 @@
     "width": 1200,
     "height": 800,
     "resizable": true,
-    "title": "performance-wails",
+    "title": "Manifest",
     "frame": true,
     "transparent": false
   }

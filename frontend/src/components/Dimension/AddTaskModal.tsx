@@ -19,7 +19,7 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({ open, onCancel, onOk, form,
       onCancel={onCancel}
       okText="确定"
       cancelText="取消"
-      width={600}
+      width={480}
     >
       <Form
         form={form}
@@ -37,7 +37,7 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({ open, onCancel, onOk, form,
           name="description"
           label="任务描述"
         >
-          <Input.TextArea placeholder="请输入任务描述" rows={4} />
+          <Input.TextArea placeholder="请输入任务描述" rows={3} />
         </Form.Item>
         <Form.Item
           name="status"

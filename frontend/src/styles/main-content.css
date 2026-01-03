@@ -18,15 +18,16 @@
     background-color: var(--color-card);
     border: 1px solid #E5E7EB;
     overflow: auto;
-    --wails-draggable: drag;
     margin-left: 0;
     /* padding: 20px 30px; */
+    --wails-draggable: no-drag;
 }
 
 .logo {
     text-align: center;
     padding: 16px 20px 12px;
     margin-bottom: 8px;
+    --wails-draggable: drag;
 }
 
 .logo h1 {

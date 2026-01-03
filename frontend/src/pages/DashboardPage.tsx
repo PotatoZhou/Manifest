@@ -7,7 +7,8 @@ import Chart from 'chart.js/auto';
 import { Calendar, Popover, Badge } from 'antd';
 import type { BadgeProps } from 'antd';
 import dayjs from 'dayjs';
-import { Gauge, Palette, Heart, Briefcase, Brain, Calendar as CalendarIcon, CalendarCheck, Save, FileSpreadsheet, Sun, Moon } from 'lucide-react';
+import { Gauge, Calendar as CalendarIcon, CalendarCheck, Save, FileSpreadsheet, Sun, Moon } from 'lucide-react';
+import * as Icons from 'lucide-react';
 import 'antd/dist/reset.css';
 
 interface DashboardPageProps {
@@ -42,28 +43,16 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ currentYear, onYearChange
   
   // 日历相关状态
   const [calendarValue, setCalendarValue] = useState(dayjs(`${currentYear}-01-01`));
+  const [calendarMode, setCalendarMode] = useState<'month' | 'year'>('year');
   
-  // 根据维度key获取对应的图标
-  const getDimensionIcon = (dimensionKey: string) => {
-    const icons: Record<string, React.ReactNode> = {
-      dream: <Palette size={18} />,
-      health: <Heart size={18} />,
-      work: <Briefcase size={18} />,
-      mind: <Brain size={18} />  
-    };
-    return icons[dimensionKey] || <Gauge size={18} />; // 默认图标
+  // 根据配置的图标名称获取对应的图标
+  const getIconByName = (name?: string) => {
+    const Comp = name ? (Icons as any)[name] : null;
+    return Comp ? <Comp size={18} /> : <Gauge size={18} />;
   };
   
-  // 根据维度key获取对应的中文名称
-  const getDimensionName = (dimensionKey: string): string => {
-    const names: Record<string, string> = {
-      dream: '梦想维度',
-      health: '健康维度',
-      work: '工作维度',
-      mind: '心理维度'
-    };
-    return names[dimensionKey] || dimensionKey;
-  };
+  // 维度配置映射
+  const configMap = Object.fromEntries(allDimensions.map(d => [d.key, d]));
   
   // 季度点击处理函数
   const handleQuarterClick = (quarter: number) => {
@@ -204,14 +193,14 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ currentYear, onYearChange
       <div className="dashboard-cards">
         {allDimensions.map(dimension => {
           const dimensionKey = dimension.key;
-          const dimensionTitle = dimension.title || getDimensionName(dimensionKey);
-          const dimensionColor = dimension.color
+          const dimensionTitle = dimension.title;
+          const dimensionColor = dimension.color;
           const dimensionData = yearData?.dimensions?.[dimensionKey];
           return (
             <div key={dimensionKey} className={`card ${dimensionKey}`}>
               <div className="card-header">
                 <div className="card-icon">
-                  {getDimensionIcon(dimensionKey)}
+                  {getIconByName(dimension.icon)}
                 </div>
                 <div>
                   <div className="card-title">{dimensionTitle}</div>
@@ -255,14 +244,18 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ currentYear, onYearChange
               max-width: 1200px !important;
             }
             .ant-picker-calendar-header {
-              padding: 15px 20px;
+              padding: 18px 24px;
             }
             .ant-picker-calendar-content th {
-              padding: 12px 0;
+              padding: 16px 0;
             }
             .ant-picker-calendar-content .ant-picker-cell-inner {
               background-color: white;
-              padding: 10px 0;
+              padding: 14px 8px;
+              border-radius: 8px;
+            }
+            .ant-picker-calendar-content .ant-picker-cell {
+              padding: 12px 10px;
             }
             /* 修复年份视图中月份重复显示的问题 */
             .ant-picker-calendar-year-panel {
@@ -274,12 +267,21 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ currentYear, onYearChange
               width: auto !important;
               margin: 0 !important;
             }
+            .ant-picker-calendar-year-panel .ant-picker-cell-inner {
+              padding: 16px 12px;
+              border-radius: 10px;
+            }
           `}</style>
           
           <Calendar
-            mode="year"
+            mode={calendarMode}
             value={calendarValue}
             onChange={handleCalendarChange}
+            onPanelChange={(value, mode) => {
+              setCalendarValue(value);
+              setCalendarMode(mode);
+            }}
+            onSelect={(date) => setCalendarValue(date)}
             cellRender={(current, info) => {
               // 只处理日期单元格，不处理月份标题或其他类型的单元格
               if (info.type === 'date') {
@@ -304,19 +306,14 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ currentYear, onYearChange
                           if (task.status === 'completed') statusColor = '#27ae60'; // 已完成绿色
                           if (task.status === 'in-progress') statusColor = '#f39c12'; // 进行中黄色
                           
-                          let dimensionColor = '#9c27b0'; // 梦想紫色
-                          if (task.dimension === 'health') dimensionColor = '#4caf50'; // 健康绿色
-                          if (task.dimension === 'work') dimensionColor = '#2196f3'; // 工作蓝色
-                          if (task.dimension === 'mind') dimensionColor = '#ff9800'; // 心理橙色
+                          const dimConf = configMap[task.dimension];
+                          const dimensionColor = dimConf?.color || '#9c27b0';
                           
                           return (
                             <div key={index} style={{ marginBottom: '12px', padding: '10px', borderRadius: '6px', backgroundColor: '#f8f9fa', borderLeft: `3px solid ${dimensionColor}` }}>
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                                 <span style={{ fontWeight: '600', color: dimensionColor }}>
-                                  {task.dimension === 'dream' && '梦想'}
-                                  {task.dimension === 'health' && '健康'}
-                                  {task.dimension === 'work' && '工作'}
-                                  {task.dimension === 'mind' && '心理'}
+                                  {dimConf?.title || task.dimension}
                                 </span>
                                 <span style={{ fontSize: '0.8rem', padding: '3px 8px', borderRadius: '12px', backgroundColor: statusColor, color: 'white' }}>
                                   {task.status === 'completed' && '已完成'}
@@ -425,7 +422,19 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ currentYear, onYearChange
         <div className="quarter-content active">
           <div className="quarter-highlight">
             <h4>季度目标</h4>
-            <p>{yearData.dimensions.dream.quarterlyGoals[selectedQuarter] || '未设置季度目标'}</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+              {allDimensions.map(dimension => {
+                const dimensionKey = dimension.key;
+                const dimData = yearData.dimensions[dimensionKey];
+                const goal = dimData?.quarterlyGoals?.[selectedQuarter] || '未设置季度目标';
+                return (
+                  <div key={dimensionKey} style={{ padding: '10px', borderRadius: '8px', background: '#f8f9fa' }}>
+                    <div style={{ fontWeight: 600, marginBottom: '6px' }}>{dimension.title}</div>
+                    <div style={{ color: '#7f8c8d' }}>{goal}</div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
           
           <div className="dimension-progress-cards">
@@ -435,7 +444,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ currentYear, onYearChange
               const dimensionColor = dimension.color;
               return (
                 <div key={dimensionKey} className="dimension-progress-card">
-                  <h5>{getDimensionName(dimensionKey)}</h5>
+                  <h5>{dimension.title}</h5>
                   <div className="dimension-progress-value">
                     {dimData.progress}%
                   </div>

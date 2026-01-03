@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
-import { Box, Plus, Map, CheckSquare, LineChart, Trash } from 'lucide-react';
+import { Popconfirm, Tooltip } from 'antd';
+import { Plus, Map, CheckSquare, LineChart, Trash, Gauge } from 'lucide-react';
+import * as Icons from 'lucide-react';
 import { performanceSystem } from '../../utils/PerformanceSystem';
 
 // 自定义滚动条样式 - 隐藏滚动条但保留滚动功能
@@ -35,11 +38,6 @@ interface SubSidebarProps {
   setSelectedDimension: (dimension: string) => void;
   showAddDimension: boolean;
   setShowAddDimension: (show: boolean) => void;
-  newDimensionName: string;
-  setNewDimensionName: (name: string) => void;
-  newDimensionColor: string;
-  setNewDimensionColor: (color: string) => void;
-  handleAddDimension: () => void;
   onDeleteDimension: (dimensionKey: string) => Promise<void>;
 }
 
@@ -58,11 +56,6 @@ const SubSidebar: React.FC<SubSidebarProps> = ({
   setSelectedDimension,
   showAddDimension,
   setShowAddDimension,
-  newDimensionName,
-  setNewDimensionName,
-  newDimensionColor,
-  setNewDimensionColor,
-  handleAddDimension,
   onDeleteDimension
 }) => {
   // 获取当前维度配置
@@ -72,10 +65,15 @@ const SubSidebar: React.FC<SubSidebarProps> = ({
     color: '#95a5a6'
   };
 
+  const getIconByName = (name?: string) => {
+    const Comp = name ? (Icons as any)[name] : null;
+    return Comp ? <Comp size={18} /> : <Gauge size={18} />;
+  };
+
   // --- 内部样式对象 ---
   const styles = {
     subSidebar: {
-      width: '100%',
+      width: '240px',
       height: '100%',
       backgroundColor: '#fff',
       borderRight: '1px solid #e8e8e8',
@@ -83,7 +81,7 @@ const SubSidebar: React.FC<SubSidebarProps> = ({
       flexDirection: 'column' as const,
       padding: '20px 0',
       boxShadow: '2px 0 8px rgba(0,0,0,0.05)',
-      overflowX: 'hidden' // 防止横向滚动条
+      overflowX: 'hidden' as const // 防止横向滚动条
     },
     navItem: (isActive: boolean) => ({
       padding: '14px 24px',
@@ -153,6 +151,7 @@ const SubSidebar: React.FC<SubSidebarProps> = ({
                   padding: '4px'
                 }}
               >
+                {/* 图标移除，保留色点 */}
                 <div style={{ 
                   width: '12px', 
                   height: '12px', 
@@ -163,108 +162,51 @@ const SubSidebar: React.FC<SubSidebarProps> = ({
                 <span style={{ fontSize: '0.85rem', color: '#595959' }}>{dim.title}</span>
               </div>
               {selectedDimension === dim.key && !dim.isDefault && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    console.log('Delete button clicked for dimension:', dim.key);
-                    if (window.confirm(`确定要删除维度 "${dim.title}" 吗？`)) {
-                      onDeleteDimension(dim.key);
-                    }
-                  }}
-                  style={{
-                    padding: '6px',
-                    backgroundColor: '#ff4d4f',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '16px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    opacity: 1,
-                    transition: 'all 0.2s',
-                    zIndex: 10,
-                    minWidth: '28px',
-                    minHeight: '28px',
-                    position: 'relative',
-                    marginLeft: '8px'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                <Popconfirm
                   title="删除维度"
+                  description={`确定要删除维度 "${dim.title}" 吗？此操作不可撤销。`}
+                  okText="删除"
+                  cancelText="取消"
+                  okButtonProps={{ danger: true }}
+                  onConfirm={() => onDeleteDimension(dim.key)}
                 >
-                  <Trash size={18} color="white" />
-                </button>
+                  <Tooltip title="删除维度">
+                    <button
+                      onClick={(e) => e.stopPropagation()}
+                      style={{
+                        padding: '6px',
+                        backgroundColor: '#fff',
+                        color: '#ff4d4f',
+                        border: '1px solid #ffd6d6',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.2s',
+                        zIndex: 10,
+                        minWidth: '28px',
+                        minHeight: '28px',
+                        marginLeft: '8px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#fff1f0';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#fff';
+                      }}
+                    >
+                      <Trash size={16} />
+                    </button>
+                  </Tooltip>
+                </Popconfirm>
               )}
             </div>
           ))}
         </div>
         
-        {/* 添加维度表单 */}
-        {showAddDimension && (
-          <div style={{ marginTop: '15px', padding: '12px', backgroundColor: '#fafafa', borderRadius: '6px' }}>
-            <input
-              type="text"
-              placeholder="输入维度名称"
-              value={newDimensionName}
-              onChange={(e) => setNewDimensionName(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '6px 8px',
-                marginBottom: '8px',
-                border: '1px solid #d9d9d9',
-                borderRadius: '4px',
-                fontSize: '0.8rem'
-              }}
-            />
-            <input
-              type="color"
-              value={newDimensionColor}
-              onChange={(e) => setNewDimensionColor(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '2px',
-                marginBottom: '8px',
-                border: '1px solid #d9d9d9',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            />
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button
-                onClick={handleAddDimension}
-                style={{
-                  flex: 1,
-                  padding: '4px 0',
-                  backgroundColor: '#673ab7',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '4px',
-                  fontSize: '0.8rem',
-                  cursor: 'pointer'
-                }}
-              >
-                添加
-              </button>
-              <button
-                onClick={() => setShowAddDimension(false)}
-                style={{
-                  flex: 1,
-                  padding: '4px 0',
-                  backgroundColor: '#f0f0f0',
-                  color: '#595959',
-                  border: '1px solid #d9d9d9',
-                  borderRadius: '4px',
-                  fontSize: '0.8rem',
-                  cursor: 'pointer'
-                }}
-              >
-                取消
-              </button>
-            </div>
-          </div>
-        )}
+        {/* 添加维度弹窗由上层控制，这里仅通过按钮开关 */}
       </div>
 
       {/* 当前维度信息 */}
@@ -276,7 +218,7 @@ const SubSidebar: React.FC<SubSidebarProps> = ({
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '0.9rem'
           }}>
-            <Box size={18} />
+            {getIconByName(config.icon)}
           </div>
           <div>
             <div style={{ fontSize: '0.95rem', fontWeight: '600' }}>{config.title}</div>

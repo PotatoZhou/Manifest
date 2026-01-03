@@ -69,11 +69,11 @@ class PerformanceSystem {
   public currentYear: string;
   private data: SystemData;
   private static readonly defaultDimensions: DimensionConfig[] = [
-    { key: 'dream', title: '梦想', icon: 'fa-rocket', color: '#9c27b0', isDefault: true },
-    { key: 'health', title: '健康', icon: 'fa-heartbeat', color: '#4caf50', isDefault: true },
-    { key: 'work', title: '工作', icon: 'fa-briefcase', color: '#2196f3', isDefault: true },
-    { key: 'mind', title: '心智', icon: 'fa-brain', color: '#ff9800', isDefault: true },
-    { key: 'psychology', title: '心理', icon: 'fa-smile', color: '#e91e63', isDefault: true }
+    { key: 'dream', title: '梦想', icon: 'Palette', color: '#9c27b0', isDefault: true },
+    { key: 'health', title: '健康', icon: 'Heart', color: '#4caf50', isDefault: true },
+    { key: 'work', title: '工作', icon: 'Briefcase', color: '#2196f3', isDefault: true },
+    { key: 'mind', title: '心智', icon: 'Brain', color: '#ff9800', isDefault: true },
+    { key: 'psychology', title: '心理', icon: 'Smile', color: '#e91e63', isDefault: true }
   ];
 
   constructor() {
@@ -91,16 +91,23 @@ class PerformanceSystem {
   private async loadDataFromBackend(): Promise<void> {
     try {
       // 使用 Wails 调用后端方法
-      if (window.go?.main?.App?.GetAllAnnualData) {
+      console.log('Checking Wails backend availability...');
+      if (typeof window !== 'undefined' && window.go?.main?.App?.GetAllAnnualData) {
+        console.log('Wails backend available, calling GetAllAnnualData...');
         const data = await window.go.main.App.GetAllAnnualData();
+        console.log('Received data from backend:', data);
         this.data = data;
       } else {
         console.error('Wails backend methods not available');
+        // 初始化默认数据，以便在没有后端的情况下也能运行
         this.data = {};
+        await this.initCurrentYear();
       }
     } catch (error) {
       console.error('Failed to load data from backend:', error);
+      // 初始化默认数据，以便在没有后端的情况下也能运行
       this.data = {};
+      await this.initCurrentYear();
     }
   }
 
@@ -108,15 +115,18 @@ class PerformanceSystem {
   private async saveDataToBackend(): Promise<void> {
     try {
       // 遍历所有年度数据并保存
-      if (window.go?.main?.App?.SaveAnnualData) {
+      console.log('Attempting to save data to backend...');
+      if (typeof window !== 'undefined' && window.go?.main?.App?.SaveAnnualData) {
         for (const year of Object.keys(this.data)) {
           const yearData = this.data[year];
           if (yearData) {
+            console.log(`Saving data for year ${year}:`, yearData);
             await window.go.main.App.SaveAnnualData(yearData);
+            console.log(`Data saved for year ${year}`);
           }
         }
       } else {
-        console.error('Wails backend methods not available');
+        console.warn('Wails backend methods not available, data will not be persisted');
       }
     } catch (error) {
       console.error('Failed to save data to backend:', error);
@@ -166,6 +176,36 @@ class PerformanceSystem {
     await this.saveData();
   }
 
+  // 同步初始化当前年份数据（用于getCurrentYearData中）
+  private syncInitCurrentYear(): void {
+    if (!this.data[this.currentYear]) {
+      const dimensions: { [key: string]: DimensionData } = {};
+      
+      // 初始化默认维度数据
+      PerformanceSystem.defaultDimensions.forEach(dimConfig => {
+        dimensions[dimConfig.key] = this.createDimensionData();
+      });
+
+      this.data[this.currentYear] = {
+        year: this.currentYear,
+        totalScore: 0,
+        settings: {
+          scoring: {
+            dimensionWeights: {
+              dream: 0.25,
+              health: 0.25,
+              work: 0.25,
+              mind: 0.25,
+              psychology: 0.25
+            }
+          }
+        },
+        dimensionConfigs: PerformanceSystem.defaultDimensions,
+        dimensions: dimensions
+      };
+    }
+  }
+
   // 创建维度数据
   private createDimensionData(): DimensionData {
     return {
@@ -213,42 +253,20 @@ class PerformanceSystem {
 
   // 获取当前年度数据
   public getCurrentYearData(): AnnualData {
-    // 确保当前年份数据存在
-    if (!this.data[this.currentYear]) {
-      this.initYearData(this.currentYear);
-    }
-    // 如果仍然不存在（可能是由于异步初始化问题），直接创建
-    if (!this.data[this.currentYear]) {
-      this.data[this.currentYear] = {
-        year: this.currentYear,
-        totalScore: 0,
-        settings: {
-          scoring: {
-            dimensionWeights: {
-              dream: 0.2,
-              health: 0.2,
-              work: 0.2,
-              mind: 0.2,
-              psychology: 0.2
-            }
-          }
-        },
-        dimensionConfigs: PerformanceSystem.defaultDimensions,
-        dimensions: {
-          dream: this.createDimensionData(),
-          health: this.createDimensionData(),
-          work: this.createDimensionData(),
-          mind: this.createDimensionData(),
-          psychology: this.createDimensionData()
-        }
-      };
-    }
-    return this.data[this.currentYear] as AnnualData;
+    // 确保当前年份数据存在（使用同步初始化方法）
+    this.syncInitCurrentYear();
+    
+    // 返回数据的深拷贝，确保 React 能够检测到状态变化
+    return JSON.parse(JSON.stringify(this.data[this.currentYear])) as AnnualData;
   }
 
   // 获取指定年度数据
   public getYearData(year: string): AnnualData | undefined {
-    return this.data[year];
+    if (!this.data[year]) {
+      return undefined;
+    }
+    // 返回数据的深拷贝，确保 React 能够检测到状态变化
+    return JSON.parse(JSON.stringify(this.data[year])) as AnnualData;
   }
 
   // 更新维度年度目标
@@ -422,7 +440,8 @@ class PerformanceSystem {
     const yearData = this.data[this.currentYear];
     if (!yearData || !yearData.dimensionConfigs) return [];
     
-    return yearData.dimensionConfigs;
+    // 返回数据的深拷贝，确保 React 能够检测到状态变化
+    return JSON.parse(JSON.stringify(yearData.dimensionConfigs)) as DimensionConfig[];
   }
 
   // 添加新维度

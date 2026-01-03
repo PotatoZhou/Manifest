@@ -33,11 +33,12 @@ const YearsPage: React.FC<YearsPageProps> = ({ currentYear, onYearChange, darkMo
     alert('导出功能将在后续版本实现');
   };
 
-  // 计算年度平均分
+  // 计算年度平均分（按当年维度配置动态计算）
   const calculateYearAverage = (yearData: import('../utils/PerformanceSystem').AnnualData) => {
-    const dimensions = ['dream', 'health', 'work', 'mind'];
-    const totalScore = dimensions.reduce((sum, dimension) => sum + (yearData.dimensions?.[dimension]?.totalScore || 0), 0);
-    return Math.round(totalScore / dimensions.length);
+    const dims = yearData.dimensionConfigs?.map(c => c.key) || Object.keys(yearData.dimensions || {});
+    if (dims.length === 0) return 0;
+    const totalScore = dims.reduce((sum, dimension) => sum + (yearData.dimensions?.[dimension]?.totalScore || 0), 0);
+    return Math.round(totalScore / dims.length);
   };
 
   // 初始化图表
@@ -113,33 +114,19 @@ const YearsPage: React.FC<YearsPageProps> = ({ currentYear, onYearChange, darkMo
 
       const currentYearData = allData[currentYear];
       if (!currentYearData) return;
-
-      const dimensions = ['dream', 'health', 'work', 'mind'];
-      const dimensionNames = {
-        dream: '梦想维度',
-        health: '健康维度',
-        work: '工作维度',
-        mind: '心理维度'
-      };
-      const dimensionColors = {
-        dream: '#ff6384',
-        health: '#36a2eb',
-        work: '#4bc0c0',
-        mind: '#9966ff'
-      };
-
-      const dimensionScores = dimensions.map(dimension => {
-        return currentYearData.dimensions?.[dimension]?.totalScore || 0;
-      });
+      const dimensions = currentYearData.dimensionConfigs?.map(c => c.key) || Object.keys(currentYearData.dimensions || {});
+      const labels = currentYearData.dimensionConfigs?.map(c => c.title) || dimensions;
+      const colors = currentYearData.dimensionConfigs?.map(c => c.color) || dimensions.map(() => '#3498db');
+      const dimensionScores = dimensions.map(dimension => currentYearData.dimensions?.[dimension]?.totalScore || 0);
 
       new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: dimensions.map(d => dimensionNames[d as keyof typeof dimensionNames]),
+          labels: labels,
           datasets: [{
             label: '维度得分',
             data: dimensionScores,
-            backgroundColor: dimensions.map(d => dimensionColors[d as keyof typeof dimensionColors]),
+            backgroundColor: colors,
             borderRadius: 5
           }]
         },
@@ -224,10 +211,9 @@ const YearsPage: React.FC<YearsPageProps> = ({ currentYear, onYearChange, darkMo
             <thead>
               <tr>
                 <th>年份</th>
-                <th>梦想维度</th>
-                <th>健康维度</th>
-                <th>工作维度</th>
-                <th>心理维度</th>
+                {((allData[currentYear] && allData[currentYear].dimensionConfigs) || []).map(cfg => (
+                  <th key={cfg.key}>{cfg.title}</th>
+                ))}
                 <th>年度平均分</th>
                 <th>操作</th>
               </tr>
@@ -235,13 +221,13 @@ const YearsPage: React.FC<YearsPageProps> = ({ currentYear, onYearChange, darkMo
             <tbody>
               {years.map(year => {
                 const yearData = allData[year] || { dimensions: {} };
+                const dims = (allData[currentYear]?.dimensionConfigs || []).map(c => c.key);
                 return (
                   <tr key={year}>
                     <td>{year}</td>
-                    <td>{yearData.dimensions?.dream?.totalScore || 0} 分</td>
-                    <td>{yearData.dimensions?.health?.totalScore || 0} 分</td>
-                    <td>{yearData.dimensions?.work?.totalScore || 0} 分</td>
-                    <td>{yearData.dimensions?.mind?.totalScore || 0} 分</td>
+                    {dims.map(dk => (
+                      <td key={dk}>{yearData.dimensions?.[dk]?.totalScore || 0} 分</td>
+                    ))}
                     <td>{calculateYearAverage(yearData)} 分</td>
                     <td>
                       <Button size="sm" onClick={() => onYearChange(year)}>

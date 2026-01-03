@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react'
 import './App.css'
 import Sidebar from './components/Sidebar/Sidebar'
@@ -9,9 +10,25 @@ import AccountSelectPage from './pages/AccountSelectPage'
 import InitPage from './pages/InitPage'
 import UpdateModal from './components/UpdateModal/UpdateModal'
 import { performanceSystem } from './utils/PerformanceSystem'
-import { GetAccounts, GetLastUsedAccount } from '../wailsjs/go/main/App'
-import { EventsOn } from '../wailsjs/runtime/runtime'
 import type { Account } from './utils/PerformanceSystem'
+
+// 动态导入 Wails 绑定，避免在非 Wails 环境下报错
+let GetAccounts: () => Promise<Account[]> = async () => [];
+let GetLastUsedAccount: () => Promise<Account | null> = async () => null;
+let EventsOn: (event: string, callback: (data: any) => void) => () => void = () => () => {};
+
+try {
+  // @ts-ignore
+  if (typeof window !== 'undefined' && window.go) {
+    const { GetAccounts: GA, GetLastUsedAccount: GLUA } = await import('../wailsjs/go/main/App');
+    const { EventsOn: EO } = await import('../wailsjs/runtime/runtime');
+    GetAccounts = GA;
+    GetLastUsedAccount = GLUA;
+    EventsOn = EO;
+  }
+} catch (error) {
+  console.warn('Wails bindings not available, using mock implementations');
+}
 
 // 中英文翻译对象
 const translations = {
@@ -88,8 +105,9 @@ function App() {
       }
     } catch (error) {
       console.error('Failed to check account status:', error)
-      // 出错时显示初始化页面
-      setShowInitPage(true)
+      // 如果没有 Wails 绑定，直接进入应用，跳过账号系统
+      console.log('Wails bindings not available, skipping account system, using mock account');
+      setCurrentAccount({ id: 'mock-1', username: 'Mock User', avatarPath: '' });
     }
   }
 
@@ -108,7 +126,7 @@ function App() {
   // 监听更新事件
   useEffect(() => {
     // 监听后端发送的更新可用事件
-    const eventId = EventsOn('updateAvailable', (result: any) => {
+    const cleanupFunction = EventsOn('updateAvailable', (result: any) => {
       if (result.updateAvailable) {
         setLatestVersion(result.latestVersion)
         setReleaseNotes(result.releaseNotes)
@@ -119,11 +137,8 @@ function App() {
 
     // 清理函数
     return () => {
-      // 取消事件监听
-      if (eventId) {
-        // 注意：Wails的EventsOn返回的是一个字符串ID，需要使用EventsOff来取消监听
-        // 由于当前版本的wailsjs可能没有EventsOff导出，这里暂时不实现清理
-      }
+      // 调用返回的清理函数来取消事件监听
+      cleanupFunction()
     }
   }, [])
   

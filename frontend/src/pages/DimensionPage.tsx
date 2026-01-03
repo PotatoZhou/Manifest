@@ -12,6 +12,7 @@ import PlanningView from '../components/Dimension/PlanningView';
 import TasksView from '../components/Dimension/TasksView';
 import AnalysisView from '../components/Dimension/AnalysisView';
 import AddTaskModal from '../components/Dimension/AddTaskModal';
+import AddDimensionModal from '../components/Dimension/AddDimensionModal';
 import DeleteTaskModal from '../components/Dimension/DeleteTaskModal';
 
 
@@ -32,8 +33,6 @@ const DimensionPage: React.FC<DimensionPageProps> = ({ dimensionKey, currentYear
   const [yearData, setYearData] = useState(performanceSystem.getCurrentYearData());
   const [selectedDimension, setSelectedDimension] = useState(dimensionKey);
   const [showAddDimension, setShowAddDimension] = useState(false);
-  const [newDimensionName, setNewDimensionName] = useState('');
-  const [newDimensionColor, setNewDimensionColor] = useState('#673ab7');
   
   // 新增任务模态框
   const [isAddTaskModalVisible, setIsAddTaskModalVisible] = useState(false);
@@ -186,23 +185,17 @@ const DimensionPage: React.FC<DimensionPageProps> = ({ dimensionKey, currentYear
 
 
   
-  // 添加新维度
-  const handleAddDimension = async () => {
-    if (!newDimensionName.trim()) return;
-    
-    const newDimension = await performanceSystem.addDimension({
-      title: newDimensionName.trim(),
-      icon: 'Cube',
-      color: newDimensionColor,
+  const handleAddDimensionSubmit = async (data: { title: string; color: string; icon: string }) => {
+    const newKey = await performanceSystem.addDimension({
+      title: data.title,
+      icon: data.icon,
+      color: data.color,
       isDefault: false
     });
-    
-    if (newDimension) {
-      setSelectedDimension(newDimension);
-      setNewDimensionName('');
+    if (newKey) {
+      setSelectedDimension(newKey);
       setShowAddDimension(false);
       setYearData(performanceSystem.getCurrentYearData());
-      // 更新维度列表
       setAllDimensions(performanceSystem.getAllDimensionConfigs());
     }
   };
@@ -273,11 +266,6 @@ const DimensionPage: React.FC<DimensionPageProps> = ({ dimensionKey, currentYear
           setSelectedDimension={setSelectedDimension}
           showAddDimension={showAddDimension}
           setShowAddDimension={setShowAddDimension}
-          newDimensionName={newDimensionName}
-          setNewDimensionName={setNewDimensionName}
-          newDimensionColor={newDimensionColor}
-          setNewDimensionColor={setNewDimensionColor}
-          handleAddDimension={handleAddDimension}
           onDeleteDimension={handleDeleteDimension}
         />
       </div>
@@ -353,6 +341,13 @@ const DimensionPage: React.FC<DimensionPageProps> = ({ dimensionKey, currentYear
             setYearData(performanceSystem.getCurrentYearData());
             setIsDeleteTaskModalVisible(false);
           }}
+        />
+
+        {/* 添加维度弹窗 */}
+        <AddDimensionModal
+          open={showAddDimension}
+          onCancel={() => setShowAddDimension(false)}
+          onSubmit={handleAddDimensionSubmit}
         />
       </div>
     </div>

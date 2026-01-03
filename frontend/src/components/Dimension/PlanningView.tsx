@@ -58,7 +58,7 @@ const PlanningView: React.FC<PlanningViewProps> = ({
             lineHeight: '1.6',
             resize: 'vertical',
             transition: 'border-color 0.3s ease',
-            fontFamily: 'inherit'
+            fontFamily: 'inherit', userSelect: 'text'
           }}
           onFocus={(e) => e.target.style.borderColor = config.color}
           onBlur={(e) => e.target.style.borderColor = '#f0f0f0'}
@@ -124,7 +124,7 @@ const PlanningView: React.FC<PlanningViewProps> = ({
                     border: '1px solid #e0e0e0',
                     borderRadius: '8px',
                     fontSize: '0.95rem',
-                    transition: 'all 0.3s ease'
+                    transition: 'all 0.3s ease', userSelect: 'text'
                   }}
                   onFocus={(e) => {
                     e.target.style.borderColor = config.color;
