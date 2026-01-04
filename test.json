@@ -1,0 +1,128 @@
+{
+"title": "成为大数据开发工程师的路线图",
+"description": "这份路线图概述了成为熟练大数据工程师的关键阶段、技能、时间线和里程碑。根据2025-2026年的行业标准和资源制定，假设兼职学习（例如，每周10-20小时）与全职工作并行。总预计时间：12-24个月。请记住，掌握一项技能需要大约10,000小时的实践（根据马尔科姆·格拉德威尔的10,000小时法则），而养成学习习惯可能只需21天（21天习惯养成理论）。坚持每天学习，形成习惯，将加速你的进步。",
+"prerequisites": [
+"基本的计算机科学知识（例如，本科学位或同等水平）",
+"熟悉编程概念"
+],
+"phases": [
+{
+"phase": 1,
+"name": "构建核心基础",
+"duration": "2-3个月",
+"goals": [
+"掌握必需的编程语言和工具",
+"理解数据基础和查询"
+],
+"topics": [
+"编程：Python（推荐）、Java或Scala",
+"SQL：查询、连接、聚合、窗口函数",
+"数据结构和算法：数组、列表、树、图",
+"版本控制：Git和GitHub",
+"Linux基础和命令行"
+],
+"milestones": [
+"完成在线Python课程并构建简单脚本",
+"在样本数据集上编写复杂SQL查询",
+"设置Git仓库并提交更改"
+]
+},
+{
+"phase": 2,
+"name": "数据库和数据存储",
+"duration": "2-3个月",
+"goals": [
+"学习关系型和非关系型数据库",
+"理解数据建模和仓库"
+],
+"topics": [
+"关系型数据库：MySQL、PostgreSQL（索引、事务）",
+"NoSQL数据库：MongoDB、Cassandra、Redis",
+"数据仓库：OLTP vs OLAP概念、星型/雪花型模式",
+"数据湖：如S3或Google Cloud Storage的存储基础",
+"数据建模：规范化、SCD（缓慢变化维度）"
+],
+"milestones": [
+"设计并查询关系型数据库模式",
+"实现简单的NoSQL数据库应用",
+"构建基本数据仓库模型"
+]
+},
+{
+"phase": 3,
+"name": "大数据技术和处理",
+"duration": "3-4个月",
+"goals": [
+"深入大数据框架和分布式系统",
+"处理大规模数据处理"
+],
+"topics": [
+"Hadoop生态系统：HDFS、MapReduce、YARN",
+"Apache Spark：批处理和流处理、Spark SQL",
+"分布式系统：CAP定理、集群计算",
+"其他工具：Kafka用于流处理、Hive、Pig",
+"云平台：AWS（EMR、S3）、Azure、Google Cloud（BigQuery、Dataflow）"
+],
+"milestones": [
+"设置本地Hadoop/Spark环境并运行作业",
+"使用Spark处理数据集进行分析",
+"在云平台上部署简单大数据应用"
+]
+},
+{
+"phase": 4,
+"name": "数据管道和ETL",
+"duration": "2-4个月",
+"goals": [
+"构建和编排数据管道",
+"学习ETL过程和编排"
+],
+"topics": [
+"ETL工具：Apache Airflow、dbt、Luigi",
+"数据摄取：批处理、实时、混合",
+"消息系统：Kafka、RabbitMQ",
+"CI/CD：GitHub Actions、Jenkins",
+"监控和测试：单元/集成测试、Prometheus"
+],
+"milestones": [
+"使用Airflow创建ETL管道",
+"使用Kafka实现实时数据流",
+"为管道设置监控并编写测试"
+]
+},
+{
+"phase": 5,
+"name": "高级主题和项目",
+"duration": "3-6个月",
+"goals": [
+"整合AI/ML元素",
+"构建作品集项目并准备就业市场"
+],
+"topics": [
+"AI整合：Spark MLlib、ML管道数据",
+"容器和编排：Docker、Kubernetes",
+"安全和合规：数据隐私、加密",
+"软技能：问题解决、沟通",
+"求职准备：简历构建、面试练习"
+],
+"milestones": [
+"完成2-3个端到端项目（例如，实时分析管道）",
+"将项目部署到GitHub或个人作品集",
+"申请初级大数据工程师职位并练习面试"
+]
+}
+],
+"total_duration": "12-24个月",
+"tips": [
+"使用Kaggle或公共来源的真实数据集练习。记住，10,000小时法则强调持续实践是成为专家的关键。",
+"参与开源项目，形成21天学习习惯，每天分配时间学习新技能。",
+"获得认证：Google Data Analytics、AWS Certified Big Data",
+"在LinkedIn上 networking，并加入社区如Reddit的r/dataengineering"
+],
+"resources": [
+"roadmap.sh/data-engineer",
+"GeeksforGeeks Data Engineering Roadmap",
+"Notion Data Engineering Template",
+"书籍：《设计数据密集型应用》 by Martin Kleppmann"
+]
+}

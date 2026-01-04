@@ -81,8 +81,8 @@ go install github.com/wailsapp/wails/v2/cmd/wails@latest
 #### 1. 克隆项目
 
 ```bash
-git clone <repository-url>
-cd performance-wails
+git clone <https://github.com/PotatoZhou/Manifest.git>
+cd Manifest
 ```
 
 #### 2. 安装前端依赖
@@ -144,7 +144,7 @@ wails build -platform linux/amd64
 性能管理系统采用清晰的分层架构，代码组织如下：
 
 ```
-performance-wails/
+Manifest/
 ├── frontend/                # 前端代码目录
 │   ├── src/                # React 源代码
 │   │   ├── components/     # 可复用 UI 组件

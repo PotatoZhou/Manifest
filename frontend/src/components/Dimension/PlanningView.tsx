@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Star, Calendar } from 'lucide-react';
 
 interface PlanningViewProps {
@@ -22,6 +22,52 @@ const PlanningView: React.FC<PlanningViewProps> = ({
   handleAnnualGoalChange, 
   handleQuarterlyGoalChange 
 }) => {
+  // 本地状态管理，用于处理中文输入法
+  const [annualGoal, setAnnualGoal] = useState(dimData.annualGoal);
+  const [isComposing, setIsComposing] = useState(false);
+  const [quarterlyGoals, setQuarterlyGoals] = useState(dimData.quarterlyGoals);
+  
+  // 当外部dimData变化时，更新本地状态
+  useEffect(() => {
+    setAnnualGoal(dimData.annualGoal);
+  }, [dimData.annualGoal]);
+  
+  useEffect(() => {
+    setQuarterlyGoals(dimData.quarterlyGoals);
+  }, [dimData.quarterlyGoals]);
+  
+  // 处理年度目标变化
+  const handleLocalAnnualGoalChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setAnnualGoal(e.target.value);
+    if (!isComposing) {
+      handleAnnualGoalChange(e);
+    }
+  };
+  
+  // 处理季度目标变化
+  const handleLocalQuarterlyGoalChange = (quarter: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const newGoals = [...quarterlyGoals];
+    newGoals[quarter] = e.target.value;
+    setQuarterlyGoals(newGoals);
+    handleQuarterlyGoalChange(quarter, e);
+  };
+  
+  // 中文输入法开始
+  const handleCompositionStart = () => {
+    setIsComposing(true);
+  };
+  
+  // 中文输入法结束
+  const handleCompositionEnd = (e: React.CompositionEvent<HTMLTextAreaElement>) => {
+    setIsComposing(false);
+    // 手动创建一个ChangeEvent类型的事件对象
+    const changeEvent = {
+      ...e,
+      target: e.target as HTMLTextAreaElement
+    } as unknown as React.ChangeEvent<HTMLTextAreaElement>;
+    handleAnnualGoalChange(changeEvent);
+  };
+  
   return (
     <div className="view-animate" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* 年度核心愿景 */}
@@ -45,8 +91,10 @@ const PlanningView: React.FC<PlanningViewProps> = ({
           年度核心愿景
         </h3>
         <textarea
-          value={dimData.annualGoal}
-          onChange={handleAnnualGoalChange}
+          value={annualGoal}
+          onChange={handleLocalAnnualGoalChange}
+          onCompositionStart={handleCompositionStart}
+          onCompositionEnd={handleCompositionEnd}
           placeholder={`输入 ${currentYear} 年的 ${config.title} 维度大方向...`}
           style={{
             width: '100%',
@@ -58,10 +106,16 @@ const PlanningView: React.FC<PlanningViewProps> = ({
             lineHeight: '1.6',
             resize: 'vertical',
             transition: 'border-color 0.3s ease',
-            fontFamily: 'inherit', userSelect: 'text'
+            fontFamily: 'inherit',
+            userSelect: 'text',
+            outline: 'none'
           }}
-          onFocus={(e) => e.target.style.borderColor = config.color}
-          onBlur={(e) => e.target.style.borderColor = '#f0f0f0'}
+          onFocus={(e) => {
+            e.target.style.border = `2px solid ${config.color}`;
+          }}
+          onBlur={(e) => {
+            e.target.style.border = '2px solid #f0f0f0';
+          }}
         />
       </div>
 
@@ -115,8 +169,8 @@ const PlanningView: React.FC<PlanningViewProps> = ({
                 </div>
                 <input
                   type="text"
-                  value={dimData.quarterlyGoals[q] || ''}
-                  onChange={(e) => handleQuarterlyGoalChange(q, e)}
+                  value={quarterlyGoals[q] || ''}
+                  onChange={(e) => handleLocalQuarterlyGoalChange(q, e)}
                   placeholder="输入本季度核心目标..."
                   style={{
                     width: '100%',
@@ -124,14 +178,16 @@ const PlanningView: React.FC<PlanningViewProps> = ({
                     border: '1px solid #e0e0e0',
                     borderRadius: '8px',
                     fontSize: '0.95rem',
-                    transition: 'all 0.3s ease', userSelect: 'text'
+                    transition: 'all 0.3s ease',
+                    userSelect: 'text',
+                    outline: 'none'
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = config.color;
+                    e.target.style.border = `1px solid ${config.color}`;
                     e.target.style.boxShadow = `0 0 0 3px ${config.color}15`;
                   }}
                   onBlur={(e) => {
-                    e.target.style.borderColor = '#e0e0e0';
+                    e.target.style.border = '1px solid #e0e0e0';
                     e.target.style.boxShadow = 'none';
                   }}
                 />

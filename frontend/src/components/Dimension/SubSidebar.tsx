@@ -2,7 +2,7 @@
 import React from 'react';
 import { Popconfirm, Tooltip } from 'antd';
 import { Plus, Map, CheckSquare, LineChart, Trash, Gauge } from 'lucide-react';
-import * as Icons from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { performanceSystem } from '../../utils/PerformanceSystem';
 
 // 自定义滚动条样式 - 隐藏滚动条但保留滚动功能
@@ -61,13 +61,19 @@ const SubSidebar: React.FC<SubSidebarProps> = ({
   // 获取当前维度配置
   const config = performanceSystem.getDimensionConfig(selectedDimension) || {
     title: '未知维度',
-    icon: 'Cube',
+    icon: 'Gauge',
     color: '#95a5a6'
   };
 
   const getIconByName = (name?: string) => {
-    const Comp = name ? (Icons as any)[name] : null;
-    return Comp ? <Comp size={18} /> : <Gauge size={18} />;
+    if (!name) return <Gauge size={18} />;
+    
+    const IconComponent = LucideIcons[name as keyof typeof LucideIcons] as React.ElementType;
+    if (typeof IconComponent === 'function') {
+      return <IconComponent size={18} />;
+    }
+    
+    return <Gauge size={18} />;
   };
 
   // --- 内部样式对象 ---
@@ -174,30 +180,27 @@ const SubSidebar: React.FC<SubSidebarProps> = ({
                     <button
                       onClick={(e) => e.stopPropagation()}
                       style={{
-                        padding: '6px',
-                        backgroundColor: '#fff',
+                        padding: '4px',
+                        backgroundColor: 'transparent',
                         color: '#ff4d4f',
-                        border: '1px solid #ffd6d6',
-                        borderRadius: '6px',
+                        border: 'none',
+                        borderRadius: '4px',
                         cursor: 'pointer',
-                        fontSize: '16px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         transition: 'all 0.2s',
                         zIndex: 10,
-                        minWidth: '28px',
-                        minHeight: '28px',
                         marginLeft: '8px'
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.backgroundColor = '#fff1f0';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#fff';
+                        e.currentTarget.style.backgroundColor = 'transparent';
                       }}
                     >
-                      <Trash size={16} />
+                      <Trash size={14} />
                     </button>
                   </Tooltip>
                 </Popconfirm>

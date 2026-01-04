@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
-import { Form } from 'antd';
+import { Form, message } from 'antd';
 
 import { performanceSystem } from '../utils/PerformanceSystem';
 import type { Task } from '../utils/PerformanceSystem';
@@ -54,6 +54,16 @@ const DimensionPage: React.FC<DimensionPageProps> = ({ dimensionKey, currentYear
   // 获取所有维度配置
   const [allDimensions, setAllDimensions] = useState(performanceSystem.getAllDimensionConfigs());
   console.log('allDimension_page------->', allDimensions);
+
+  // 确保选中有效的维度
+  React.useEffect(() => {
+    if (allDimensions.length > 0) {
+      const dimensionExists = allDimensions.some(dim => dim.key === selectedDimension);
+      if (!dimensionExists) {
+        setSelectedDimension(allDimensions[0].key);
+      }
+    }
+  }, [allDimensions, selectedDimension, setSelectedDimension]);
 
   // --- 数据获取 ---
   const config = performanceSystem.getDimensionConfig(selectedDimension) || {
@@ -186,32 +196,48 @@ const DimensionPage: React.FC<DimensionPageProps> = ({ dimensionKey, currentYear
 
   
   const handleAddDimensionSubmit = async (data: { title: string; color: string; icon: string }) => {
-    const newKey = await performanceSystem.addDimension({
-      title: data.title,
-      icon: data.icon,
-      color: data.color,
-      isDefault: false
-    });
-    if (newKey) {
-      setSelectedDimension(newKey);
-      setShowAddDimension(false);
-      setYearData(performanceSystem.getCurrentYearData());
-      setAllDimensions(performanceSystem.getAllDimensionConfigs());
+    try {
+      const newKey = await performanceSystem.addDimension({
+        title: data.title,
+        icon: data.icon,
+        color: data.color,
+        isDefault: false
+      });
+      if (newKey) {
+        setSelectedDimension(newKey);
+        setShowAddDimension(false);
+        setYearData(performanceSystem.getCurrentYearData());
+        setAllDimensions(performanceSystem.getAllDimensionConfigs());
+        message.success('维度添加成功');
+      } else {
+        message.error('维度添加失败');
+      }
+    } catch (error) {
+      console.error('添加维度失败:', error);
+      message.error('维度添加失败，请重试');
     }
   };
 
   // 删除维度
   const handleDeleteDimension = async (dimensionKey: string) => {
-    const success = await performanceSystem.deleteDimension(dimensionKey);
-    if (success) {
-      // 如果删除的是当前选中的维度，切换到第一个维度
-      const allDims = performanceSystem.getAllDimensionConfigs();
-      if (selectedDimension === dimensionKey && allDims.length > 0) {
-        setSelectedDimension(allDims[0].key);
+    try {
+      const success = await performanceSystem.deleteDimension(dimensionKey);
+      if (success) {
+        // 如果删除的是当前选中的维度，切换到第一个维度
+        const allDims = performanceSystem.getAllDimensionConfigs();
+        if (selectedDimension === dimensionKey && allDims.length > 0) {
+          setSelectedDimension(allDims[0].key);
+        }
+        // 更新数据
+        setYearData(performanceSystem.getCurrentYearData());
+        setAllDimensions(allDims);
+        message.success('维度删除成功');
+      } else {
+        message.error('维度删除失败');
       }
-      // 更新数据
-      setYearData(performanceSystem.getCurrentYearData());
-      setAllDimensions(allDims);
+    } catch (error) {
+      console.error('删除维度失败:', error);
+      message.error('维度删除失败，请重试');
     }
   };
 

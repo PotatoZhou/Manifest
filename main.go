@@ -16,7 +16,7 @@ func main() {
 	app := NewApp()
 
 	err := wails.Run(&options.App{
-		Title:     "performance-wails",
+		Title:     "Manifest",
 		Width:     1200,
 		Height:    800,
 		MinWidth:  1200,

@@ -104,6 +104,11 @@ func (a *App) ResetAllData() error {
 	return ResetAllData()
 }
 
+// ImportData 导入数据
+func (a *App) ImportData(data SystemData) error {
+	return ImportData(data)
+}
+
 // GetAccounts 获取所有账号
 func (a *App) GetAccounts() ([]Account, error) {
 	return GetAccounts()

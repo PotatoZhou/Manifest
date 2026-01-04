@@ -22,6 +22,8 @@ export function GetLastUsedAccount():Promise<main.Account>;
 
 export function Greet(arg1:string):Promise<string>;
 
+export function ImportData(arg1:main.SystemData):Promise<void>;
+
 export function NewAccount(arg1:string,arg2:string):Promise<main.Account>;
 
 export function OpenDownloadURL(arg1:string):Promise<void>;

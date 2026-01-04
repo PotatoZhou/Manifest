@@ -4,6 +4,7 @@ import { performanceSystem } from '../utils/PerformanceSystem';
 import Button from '../components/Button/Button';
 import YearSelector from '../components/YearSelector/YearSelector';
 import Chart from 'chart.js/auto';
+import * as XLSX from 'xlsx';
 
 interface YearsPageProps {
   currentYear: string;
@@ -30,7 +31,78 @@ const YearsPage: React.FC<YearsPageProps> = ({ currentYear, onYearChange, darkMo
 
   // 导出到Excel
   const handleExportToExcel = () => {
-    alert('导出功能将在后续版本实现');
+    console.log('开始导出Excel...');
+    try {
+      const allData = performanceSystem.getAllData();
+      console.log('获取到所有数据:', allData);
+      
+      const years = performanceSystem.getAvailableYears().sort((a, b) => parseInt(b) - parseInt(a));
+      console.log('可用年份:', years);
+      
+      const currentYearData = allData[years[0]] || { dimensions: {} };
+      const dims = (currentYearData.dimensionConfigs || []).map(c => c.key);
+      const dimTitles = (currentYearData.dimensionConfigs || []).map(c => c.title);
+      
+      console.log('维度配置:', dims, dimTitles);
+      
+      // 准备Excel数据
+      const headers = ['年份', ...dimTitles, '年度平均分'];
+      const rows = years.map(year => {
+        const yearData = allData[year] || { dimensions: {} };
+        const dimScores = dims.map(dk => (yearData.dimensions?.[dk]?.totalScore || 0) + ' 分');
+        const avgScore = calculateYearAverage(yearData) + ' 分';
+        return [year, ...dimScores, avgScore];
+      });
+      
+      console.log('准备导出的数据:', [headers, ...rows]);
+      
+      // 创建工作簿和工作表
+      const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+      console.log('创建工作表成功');
+      
+      const workbook = XLSX.utils.book_new();
+      console.log('创建工作簿成功');
+      
+      XLSX.utils.book_append_sheet(workbook, worksheet, '历年绩效数据');
+      console.log('添加工作表到工作簿成功');
+      
+      // 导出Excel文件
+      const fileName = `performance-data-${new Date().toISOString().split('T')[0]}.xlsx`;
+      console.log('准备导出文件:', fileName);
+      
+      XLSX.writeFile(workbook, fileName);
+      console.log('导出文件成功');
+      
+      alert('导出成功！文件已保存到下载文件夹。');
+    } catch (error) {
+      console.error('导出失败:', error);
+      alert('导出失败: ' + (error as Error).message);
+    }
+  };
+
+  // 导入JSON数据
+  const handleImportFromJson = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          try {
+            const data = JSON.parse(event.target?.result as string);
+            await performanceSystem.importData(data);
+            // 刷新页面数据
+            window.location.reload();
+          } catch (error) {
+            alert('导入失败：' + (error as Error).message);
+          }
+        };
+        reader.readAsText(file);
+      }
+    };
+    input.click();
   };
 
   // 计算年度平均分（按当年维度配置动态计算）
@@ -183,6 +255,9 @@ const YearsPage: React.FC<YearsPageProps> = ({ currentYear, onYearChange, darkMo
           </Button>
           <Button type="success" onClick={handleExportToExcel}>
             <FileSpreadsheet size={16} style={{ marginRight: '8px' }} /> 导出Excel
+          </Button>
+          <Button type="primary" onClick={handleImportFromJson}>
+            <FileSpreadsheet size={16} style={{ marginRight: '8px' }} /> 导入JSON
           </Button>
           <Button onClick={toggleDarkMode} type="light">
             {darkMode ? <Sun size={16} /> : <Moon size={16} />}

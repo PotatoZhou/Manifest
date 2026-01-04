@@ -13,20 +13,20 @@ import { performanceSystem } from './utils/PerformanceSystem'
 import type { Account } from './utils/PerformanceSystem'
 
 // 动态导入 Wails 绑定，避免在非 Wails 环境下报错
-let GetAccounts: () => Promise<Account[]> = async () => [];
-let GetLastUsedAccount: () => Promise<Account | null> = async () => null;
+// let GetAccounts: () => Promise<Account[]> = async () => [];
+// let GetLastUsedAccount: () => Promise<Account | null> = async () => null;
 let EventsOn: (event: string, callback: (data: any) => void) => () => void = () => () => {};
 
 try {
-  // @ts-ignore
   if (typeof window !== 'undefined' && window.go) {
-    const { GetAccounts: GA, GetLastUsedAccount: GLUA } = await import('../wailsjs/go/main/App');
+    // const { GetAccounts: GA, GetLastUsedAccount: GLUA } = await import('../wailsjs/go/main/App');
     const { EventsOn: EO } = await import('../wailsjs/runtime/runtime');
-    GetAccounts = GA;
-    GetLastUsedAccount = GLUA;
+    // GetAccounts = GA;
+    // GetLastUsedAccount = GLUA;
     EventsOn = EO;
   }
 } catch (error) {
+  console.log(error)
   console.warn('Wails bindings not available, using mock implementations');
 }
 
@@ -86,35 +86,35 @@ function App() {
   // 组件挂载后初始化性能系统和账号系统
 
 
-  const checkAccountStatus = async () => {
-    try {
-      const accounts = await GetAccounts()
-      if (accounts.length === 0) {
-        // 没有账号，显示初始化页面
-        setShowInitPage(true)
-      } else {
-        // 有账号，检查是否有最后使用的账号
-        const lastUsedAccount = await GetLastUsedAccount()
-        if (lastUsedAccount) {
-          // 有最后使用的账号，直接进入应用
-          setCurrentAccount(lastUsedAccount)
-        } else {
-          // 没有最后使用的账号，显示账号选择页面
-          setShowAccountSelect(true)
-        }
-      }
-    } catch (error) {
-      console.error('Failed to check account status:', error)
-      // 如果没有 Wails 绑定，直接进入应用，跳过账号系统
-      console.log('Wails bindings not available, skipping account system, using mock account');
-      setCurrentAccount({ id: 'mock-1', username: 'Mock User', avatarPath: '' });
-    }
-  }
+  // const checkAccountStatus = async () => {
+  //   try {
+  //     const accounts = await GetAccounts()
+  //     if (accounts.length === 0) {
+  //       // 没有账号，显示初始化页面
+  //       setShowInitPage(true)
+  //     } else {
+  //       // 有账号，检查是否有最后使用的账号
+  //       const lastUsedAccount = await GetLastUsedAccount()
+  //       if (lastUsedAccount) {
+  //         // 有最后使用的账号，直接进入应用
+  //         setCurrentAccount(lastUsedAccount)
+  //       } else {
+  //         // 没有最后使用的账号，显示账号选择页面
+  //         setShowAccountSelect(true)
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error('Failed to check account status:', error)
+  //     // 如果没有 Wails 绑定，直接进入应用，跳过账号系统
+  //     console.log('Wails bindings not available, skipping account system, using mock account');
+  //     setCurrentAccount({ id: 'mock-1', username: 'Mock User', avatarPath: '' });
+  //   }
+  // }
 
   useEffect(() => {
     async function init() {
       // 初始化账号系统
-      await checkAccountStatus()
+      // await checkAccountStatus()
       // 初始化性能系统
       await performanceSystem.initialize()
       setIsLoading(false)

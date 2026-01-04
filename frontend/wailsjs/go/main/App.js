@@ -42,6 +42,10 @@ export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
 }
 
+export function ImportData(arg1) {
+  return window['go']['main']['App']['ImportData'](arg1);
+}
+
 export function NewAccount(arg1, arg2) {
   return window['go']['main']['App']['NewAccount'](arg1, arg2);
 }

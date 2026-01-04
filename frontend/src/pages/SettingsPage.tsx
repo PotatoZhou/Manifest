@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { Settings as SettingsIcon, Save, Sun, Moon, SlidersHorizontal, Database, Upload, Download, Trash, Info } from 'lucide-react';
-import { Select } from 'antd';
+import { Select, Modal } from 'antd';
 import { performanceSystem } from '../utils/PerformanceSystem';
 import Button from '../components/Button/Button';
 import YearSelector from '../components/YearSelector/YearSelector';
@@ -35,15 +36,73 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ currentYear, onYearChange, 
 
   // 重置数据
   const handleResetData = () => {
-    if (window.confirm('确定要重置所有数据吗？此操作不可恢复！')) {
-      performanceSystem.resetAllData();
-      alert('数据已重置！');
-    }
+    Modal.confirm({
+      title: '确认重置数据',
+      content: '确定要重置所有数据吗？此操作不可恢复！',
+      okText: '确认重置',
+      okType: 'danger',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+          await performanceSystem.resetAllData();
+          Modal.success({
+            title: '数据重置成功',
+            content: '所有数据已成功重置！',
+            onOk: () => {
+              // 刷新页面或重新加载数据
+              window.location.reload();
+            }
+          });
+        } catch (error) {
+          console.error('重置数据失败:', error);
+          Modal.error({
+            title: '数据重置失败',
+            content: '重置数据时发生错误，请重试！'
+          });
+        }
+      }
+    });
   };
 
   // 导入数据
   const handleImportData = () => {
-    alert('导入功能将在后续版本实现');
+    // 创建文件选择输入
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.json';
+    
+    // 监听文件选择事件
+    fileInput.onchange = (e: any) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      // 读取文件内容
+      const reader = new FileReader();
+      reader.onload = async (event: any) => {
+        try {
+          // 解析JSON数据
+          const data = JSON.parse(event.target.result);
+          
+          // 调用导入方法
+          await performanceSystem.importData(data);
+          
+          // 提示成功
+          alert('数据导入成功！');
+          
+          // 刷新页面或重新加载数据
+          window.location.reload();
+        } catch (error) {
+          console.error('导入数据失败:', error);
+          alert('导入数据失败，请检查文件格式是否正确！');
+        }
+      };
+      
+      // 读取文件
+      reader.readAsText(file);
+    };
+    
+    // 触发文件选择
+    fileInput.click();
   };
 
   // 导出数据
@@ -211,7 +270,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ currentYear, onYearChange, 
         <div className="about-container">
           <div className="about-item">
             <h4>系统名称</h4>
-            <p>个人绩效管理系统</p>
+            <p>Manifest</p>
           </div>
           
           <div className="about-item">

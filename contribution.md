@@ -9,8 +9,8 @@
 
 1. 克隆项目
 ```bash
-git clone <repository-url>
-cd performance-wails
+git clone <https://github.com/PotatoZhou/Manifest.git>
+cd Manifest
 ```
 
 2. 安装依赖
@@ -40,7 +40,7 @@ wails build -platform all
 ## 项目结构
 
 ```
-performance-wails/
+Manifest/
 ├── build/                  # 构建输出目录
 ├── frontend/               # UI代码
 │   ├── src/

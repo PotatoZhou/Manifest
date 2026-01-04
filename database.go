@@ -758,4 +758,98 @@ func ResetAllData() error {
 	return nil
 }
 
+// ImportData 导入数据
+func ImportData(data SystemData) error {
+	// 开始事务
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	// 首先清空所有数据
+	if err = resetAllData(tx); err != nil {
+		return err
+	}
+
+	// 导入年度数据
+	for year, annualData := range data {
+		// 保存年度基本信息
+		settingsJSON, err := json.Marshal(annualData.Settings)
+		if err != nil {
+			return err
+		}
+
+		_, err = tx.Exec(
+			`INSERT INTO annual_data (year, total_score, settings) VALUES (?, ?, ?)`,
+			year, annualData.TotalScore, string(settingsJSON),
+		)
+		if err != nil {
+			return err
+		}
+
+		// 保存维度配置
+		for _, dimConfig := range annualData.DimensionConfigs {
+			_, err = tx.Exec(
+				`INSERT INTO dimension_configs (year, dimension_key, title, icon, color, is_default) VALUES (?, ?, ?, ?, ?, ?)`,
+				year, dimConfig.Key, dimConfig.Title, dimConfig.Icon, dimConfig.Color, dimConfig.IsDefault,
+			)
+			if err != nil {
+				return err
+			}
+		}
+
+		// 保存维度数据
+		for dimKey, dimData := range annualData.Dimensions {
+			if err = saveDimensionData(tx, year, dimKey, dimData); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+// 辅助函数：重置所有数据（使用事务）
+func resetAllData(tx *sql.Tx) error {
+	// 删除所有表中的数据
+	_, err := tx.Exec(`DELETE FROM tasks`)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`DELETE FROM monthly_tasks`)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`DELETE FROM quarterly_goals`)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`DELETE FROM dimension_data`)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`DELETE FROM dimension_configs`)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`DELETE FROM annual_data`)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // 账号相关数据库操作已在 config.go 中实现，这里只保留表结构定义

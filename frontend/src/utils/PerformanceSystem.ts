@@ -68,13 +68,7 @@ export interface SystemData {
 class PerformanceSystem {
   public currentYear: string;
   private data: SystemData;
-  private static readonly defaultDimensions: DimensionConfig[] = [
-    { key: 'dream', title: '梦想', icon: 'Palette', color: '#9c27b0', isDefault: true },
-    { key: 'health', title: '健康', icon: 'Heart', color: '#4caf50', isDefault: true },
-    { key: 'work', title: '工作', icon: 'Briefcase', color: '#2196f3', isDefault: true },
-    { key: 'mind', title: '心智', icon: 'Brain', color: '#ff9800', isDefault: true },
-    { key: 'psychology', title: '心理', icon: 'Smile', color: '#e91e63', isDefault: true }
-  ];
+  private static readonly defaultDimensions: DimensionConfig[] = [];
 
   constructor() {
     this.currentYear = new Date().getFullYear().toString();
@@ -160,13 +154,7 @@ class PerformanceSystem {
       totalScore: 0,
       settings: {
         scoring: {
-          dimensionWeights: {
-            dream: 0.25,
-            health: 0.25,
-            work: 0.25,
-            mind: 0.25,
-            psychology: 0.25
-          }
+          dimensionWeights: {}
         }
       },
       dimensionConfigs: PerformanceSystem.defaultDimensions,
@@ -187,22 +175,16 @@ class PerformanceSystem {
       });
 
       this.data[this.currentYear] = {
-        year: this.currentYear,
-        totalScore: 0,
-        settings: {
-          scoring: {
-            dimensionWeights: {
-              dream: 0.25,
-              health: 0.25,
-              work: 0.25,
-              mind: 0.25,
-              psychology: 0.25
-            }
-          }
-        },
-        dimensionConfigs: PerformanceSystem.defaultDimensions,
-        dimensions: dimensions
-      };
+      year: this.currentYear,
+      totalScore: 0,
+      settings: {
+        scoring: {
+          dimensionWeights: {}
+        }
+      },
+      dimensionConfigs: PerformanceSystem.defaultDimensions,
+      dimensions: dimensions
+    };
     }
   }
 
@@ -447,7 +429,34 @@ class PerformanceSystem {
   // 添加新维度
   public async addDimension(config: Omit<DimensionConfig, 'key'>): Promise<string> {
     const yearData = this.data[this.currentYear];
-    if (!yearData || !yearData.dimensionConfigs) return '';
+    if (!yearData) return '';
+
+    // 确保dimensionConfigs存在
+    if (!yearData.dimensionConfigs) {
+      yearData.dimensionConfigs = [];
+    }
+
+    // 确保dimensions存在
+    if (!yearData.dimensions) {
+      yearData.dimensions = {};
+    }
+
+    // 确保settings.scoring.dimensionWeights存在
+    if (!yearData.settings || !yearData.settings.scoring || !yearData.settings.scoring.dimensionWeights) {
+      if (!yearData.settings) {
+        yearData.settings = {
+          scoring: {
+            dimensionWeights: {}
+          }
+        };
+      } else if (!yearData.settings.scoring) {
+        yearData.settings.scoring = {
+          dimensionWeights: {}
+        };
+      } else if (!yearData.settings.scoring.dimensionWeights) {
+        yearData.settings.scoring.dimensionWeights = {};
+      }
+    }
 
     // 生成唯一key
     const dimensionKey = `custom_${Date.now()}`;
@@ -477,10 +486,6 @@ class PerformanceSystem {
     // 查找维度配置
     const configIndex = yearData.dimensionConfigs.findIndex(config => config.key === dimensionKey);
     if (configIndex === -1) return false;
-
-    // 不能删除默认维度
-    const config = yearData.dimensionConfigs[configIndex];
-    if (config.isDefault) return false;
 
     // 删除维度配置
     yearData.dimensionConfigs.splice(configIndex, 1);
@@ -533,7 +538,28 @@ class PerformanceSystem {
 
   // 获取所有数据
   public getAllData(): SystemData {
-    return this.data;
+    // 返回数据的深拷贝，确保 React 能够检测到状态变化
+    return JSON.parse(JSON.stringify(this.data)) as SystemData;
+  }
+
+  // 导出数据
+  public exportData(): SystemData {
+    // 返回所有数据的深拷贝，用于导出
+    return JSON.parse(JSON.stringify(this.data)) as SystemData;
+  }
+
+  // 导入数据
+  public async importData(data: SystemData): Promise<void> {
+    try {
+      // 更新内存中的数据
+      this.data = data;
+      
+      // 调用后端保存数据的方法
+      await this.saveData();
+    } catch (error) {
+      console.error('Failed to import data:', error);
+      throw error;
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-module performance-wails
+module Manifest
 
 go 1.24.0
 
