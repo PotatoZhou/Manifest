@@ -1,4 +1,4 @@
-<div align="center"><h1>Manifest (WIP)</h1></div>
+<div align="center"><h1>Manifest</h1></div>
 
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
