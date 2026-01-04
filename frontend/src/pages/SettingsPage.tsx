@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, Save, Sun, Moon, SlidersHorizontal, Database, Upload, Download, Trash, Info } from 'lucide-react';
+import { Settings as SettingsIcon, Save, SlidersHorizontal, Database, Trash, Info } from 'lucide-react';
 import { Select, Modal } from 'antd';
 import { performanceSystem } from '../utils/PerformanceSystem';
 import Button from '../components/Button/Button';
@@ -13,7 +13,7 @@ interface SettingsPageProps {
   toggleDarkMode: () => void;
 }
 
-const SettingsPage: React.FC<SettingsPageProps> = ({ currentYear, onYearChange, darkMode, toggleDarkMode }) => {
+const SettingsPage: React.FC<SettingsPageProps> = ({ currentYear, onYearChange }) => {
   const [settings, setSettings] = useState({
     autoSave: true,
     theme: 'light',
@@ -65,58 +65,58 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ currentYear, onYearChange, 
   };
 
   // 导入数据
-  const handleImportData = () => {
-    // 创建文件选择输入
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = '.json';
+  // const handleImportData = () => {
+  //   // 创建文件选择输入
+  //   const fileInput = document.createElement('input');
+  //   fileInput.type = 'file';
+  //   fileInput.accept = '.json';
     
-    // 监听文件选择事件
-    fileInput.onchange = (e: any) => {
-      const file = e.target.files[0];
-      if (!file) return;
+  //   // 监听文件选择事件
+  //   fileInput.onchange = (e: any) => {
+  //     const file = e.target.files[0];
+  //     if (!file) return;
       
-      // 读取文件内容
-      const reader = new FileReader();
-      reader.onload = async (event: any) => {
-        try {
-          // 解析JSON数据
-          const data = JSON.parse(event.target.result);
+  //     // 读取文件内容
+  //     const reader = new FileReader();
+  //     reader.onload = async (event: any) => {
+  //       try {
+  //         // 解析JSON数据
+  //         const data = JSON.parse(event.target.result);
           
-          // 调用导入方法
-          await performanceSystem.importData(data);
+  //         // 调用导入方法
+  //         await performanceSystem.importData(data);
           
-          // 提示成功
-          alert('数据导入成功！');
+  //         // 提示成功
+  //         alert('数据导入成功！');
           
-          // 刷新页面或重新加载数据
-          window.location.reload();
-        } catch (error) {
-          console.error('导入数据失败:', error);
-          alert('导入数据失败，请检查文件格式是否正确！');
-        }
-      };
+  //         // 刷新页面或重新加载数据
+  //         window.location.reload();
+  //       } catch (error) {
+  //         console.error('导入数据失败:', error);
+  //         alert('导入数据失败，请检查文件格式是否正确！');
+  //       }
+  //     };
       
-      // 读取文件
-      reader.readAsText(file);
-    };
+  //     // 读取文件
+  //     reader.readAsText(file);
+  //   };
     
-    // 触发文件选择
-    fileInput.click();
-  };
+  //   // 触发文件选择
+  //   fileInput.click();
+  // };
 
   // 导出数据
-  const handleExportData = () => {
-    const data = performanceSystem.getAllData();
-    const dataStr = JSON.stringify(data, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `performance_data_${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
+  // const handleExportData = () => {
+  //   const data = performanceSystem.getAllData();
+  //   const dataStr = JSON.stringify(data, null, 2);
+  //   const dataBlob = new Blob([dataStr], { type: 'application/json' });
+  //   const url = URL.createObjectURL(dataBlob);
+  //   const link = document.createElement('a');
+  //   link.href = url;
+  //   link.download = `performance_data_${new Date().toISOString().split('T')[0]}.json`;
+  //   link.click();
+  //   URL.revokeObjectURL(url);
+  // };
 
   return (
     <div id="settings-page" className="page" style={{ padding: '20px 30px' }}>
@@ -127,9 +127,9 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ currentYear, onYearChange, 
           <Button onClick={handleSaveSettings}>
             <Save size={16} style={{ marginRight: '8px' }} /> 保存设置
           </Button>
-          <Button onClick={toggleDarkMode} type="light">
+          {/* <Button onClick={toggleDarkMode} type="light">
             {darkMode ? <Sun size={16} /> : <Moon size={16} />}
-          </Button>
+          </Button> */}
         </div>
       </div>
       
@@ -164,7 +164,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ currentYear, onYearChange, 
             </div>
           </div>
           
-          <div className="setting-item">
+          {/* <div className="setting-item">
             <div className="setting-info">
               <h4>主题</h4>
               <p>选择系统主题</p>
@@ -179,7 +179,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ currentYear, onYearChange, 
                 <Select.Option value="dark">深色主题</Select.Option>
               </Select>
             </div>
-          </div>
+          </div> */}
           
           <div className="setting-item">
             <div className="setting-info">
@@ -229,7 +229,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ currentYear, onYearChange, 
         </div>
         
         <div className="data-management-container">
-          <div className="data-action">
+          {/* <div className="data-action">
             <h4>导入数据</h4>
             <p>从JSON文件导入数据</p>
             <Button onClick={handleImportData}>
@@ -243,7 +243,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ currentYear, onYearChange, 
             <Button onClick={handleExportData}>
               <Download size={16} style={{ marginRight: '8px' }} /> 导出数据
             </Button>
-          </div>
+          </div> */}
           
           <div className="data-action danger">
             <h4>重置数据</h4>

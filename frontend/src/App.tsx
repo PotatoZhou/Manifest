@@ -6,23 +6,15 @@ import DashboardPage from './pages/DashboardPage'
 import DimensionPage from './pages/DimensionPage'
 import YearsPage from './pages/YearsPage'
 import SettingsPage from './pages/SettingsPage'
-import AccountSelectPage from './pages/AccountSelectPage'
-import InitPage from './pages/InitPage'
 import UpdateModal from './components/UpdateModal/UpdateModal'
 import { performanceSystem } from './utils/PerformanceSystem'
-import type { Account } from './utils/PerformanceSystem'
 
 // 动态导入 Wails 绑定，避免在非 Wails 环境下报错
-// let GetAccounts: () => Promise<Account[]> = async () => [];
-// let GetLastUsedAccount: () => Promise<Account | null> = async () => null;
 let EventsOn: (event: string, callback: (data: any) => void) => () => void = () => () => {};
 
 try {
   if (typeof window !== 'undefined' && window.go) {
-    // const { GetAccounts: GA, GetLastUsedAccount: GLUA } = await import('../wailsjs/go/main/App');
     const { EventsOn: EO } = await import('../wailsjs/runtime/runtime');
-    // GetAccounts = GA;
-    // GetLastUsedAccount = GLUA;
     EventsOn = EO;
   }
 } catch (error) {
@@ -72,52 +64,16 @@ function App() {
   const [darkMode, setDarkMode] = useState<boolean>(getInitialDarkMode())
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false)
   const [language, setLanguage] = useState<'zh' | 'en'>(getInitialLanguage())
-  // 账号系统状态
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [showAccountSelect, setShowAccountSelect] = useState<boolean>(false)
-  const [showInitPage, setShowInitPage] = useState<boolean>(false)
-  const [currentAccount, setCurrentAccount] = useState<Account | null>(null)
   // 更新提醒状态
   const [showUpdateModal, setShowUpdateModal] = useState<boolean>(false)
   const [latestVersion, setLatestVersion] = useState<string>('')
   const [releaseNotes, setReleaseNotes] = useState<string>('')
   const [downloadURL, setDownloadURL] = useState<string>('')
 
-  // 组件挂载后初始化性能系统和账号系统
-
-
-  // const checkAccountStatus = async () => {
-  //   try {
-  //     const accounts = await GetAccounts()
-  //     if (accounts.length === 0) {
-  //       // 没有账号，显示初始化页面
-  //       setShowInitPage(true)
-  //     } else {
-  //       // 有账号，检查是否有最后使用的账号
-  //       const lastUsedAccount = await GetLastUsedAccount()
-  //       if (lastUsedAccount) {
-  //         // 有最后使用的账号，直接进入应用
-  //         setCurrentAccount(lastUsedAccount)
-  //       } else {
-  //         // 没有最后使用的账号，显示账号选择页面
-  //         setShowAccountSelect(true)
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.error('Failed to check account status:', error)
-  //     // 如果没有 Wails 绑定，直接进入应用，跳过账号系统
-  //     console.log('Wails bindings not available, skipping account system, using mock account');
-  //     setCurrentAccount({ id: 'mock-1', username: 'Mock User', avatarPath: '' });
-  //   }
-  // }
-
   useEffect(() => {
     async function init() {
-      // 初始化账号系统
-      // await checkAccountStatus()
       // 初始化性能系统
       await performanceSystem.initialize()
-      setIsLoading(false)
     }
 
     init()
@@ -142,29 +98,6 @@ function App() {
     }
   }, [])
   
-
-  // 处理账号选择
-  const handleAccountSelect = (account: Account) => {
-    setCurrentAccount(account)
-    setShowAccountSelect(false)
-  }
-
-  // 处理新账号创建
-  const handleAccountCreated = (account: Account) => {
-    setCurrentAccount(account)
-    setShowInitPage(false)
-  }
-
-  // 处理添加新账号
-  const handleAddAccount = () => {
-    setShowAccountSelect(false)
-    setShowInitPage(true)
-  }
-
-  // 处理切换账号
-  const handleSwitchAccount = () => {
-    setShowAccountSelect(true)
-  }
 
   // 切换语言
   const toggleLanguage = () => {
@@ -209,32 +142,6 @@ function App() {
     }
   }
 
-  // 加载中
-  if (isLoading) {
-    return (
-      <div className="loading-container">
-        <div className="target-container">
-          <div className="target"></div>
-        </div>
-      </div>
-    )
-  }
-
-  // 显示账号选择页面
-  if (showAccountSelect) {
-    return (
-      <AccountSelectPage 
-        onAccountSelect={handleAccountSelect} 
-        onAddAccount={handleAddAccount} 
-      />
-    )
-  }
-
-  // 显示初始化页面
-  if (showInitPage) {
-    return <InitPage onAccountCreated={handleAccountCreated} />
-  }
-
   // 显示应用主界面
   return (
     <div className={`app-container ${darkMode ? 'dark' : ''}`}>
@@ -248,8 +155,6 @@ function App() {
         language={language}
         toggleLanguage={toggleLanguage}
         translations={translations}
-        currentAccount={currentAccount}
-        onSwitchAccount={handleSwitchAccount}
       />
       
       {/* 主内容容器 */}

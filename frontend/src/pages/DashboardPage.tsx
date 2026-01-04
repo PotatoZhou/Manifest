@@ -54,22 +54,6 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ currentYear, onYearChange
     console.error('yearData或dimensions未定义，使用默认值');
   }
 
-  // 保存所有数据
-  const handleSaveAllData = () => {
-    const alertElement = document.getElementById('alert-success');
-    if (alertElement) {
-      alertElement.style.display = 'block';
-      setTimeout(() => {
-        alertElement.style.display = 'none';
-      }, 3000);
-    }
-  };
-
-  // 导出到Excel（简单实现）
-  const handleExportToExcel = () => {
-    alert('导出功能将在后续版本实现');
-  };
-
   return (
     <div id="dashboard-page" className="page" style={{ padding: '20px 30px' }}>
       <PageHeader
@@ -77,13 +61,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ currentYear, onYearChange
         onYearChange={onYearChange}
         darkMode={darkMode}
         toggleDarkMode={toggleDarkMode}
-        onSaveAllData={handleSaveAllData}
-        onExportToExcel={handleExportToExcel}
       />
-      
-      <div id="alert-success" className="alert alert-success" style={{ display: 'none' }}>
-        ✅ 数据已成功保存！
-      </div>
       
       <QuarterIndicator currentQuarter={currentQuarter} />
       

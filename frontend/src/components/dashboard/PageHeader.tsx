@@ -1,6 +1,6 @@
 import React from 'react';
-import { Gauge, Save, Sun, Moon } from 'lucide-react';
-import Button from '../Button/Button';
+import { Gauge } from 'lucide-react';
+// import Button from '../Button/Button';
 import YearSelector from '../YearSelector/YearSelector';
 
 interface PageHeaderProps {
@@ -8,28 +8,23 @@ interface PageHeaderProps {
   onYearChange: (year: string) => void;
   darkMode: boolean;
   toggleDarkMode: () => void;
-  onSaveAllData: () => void;
-  onExportToExcel: () => void;
+  onExportToExcel?: () => void;
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({ 
   currentYear, 
   onYearChange, 
-  darkMode, 
-  toggleDarkMode,
-  onSaveAllData,
+  // darkMode, 
+  // toggleDarkMode,
 }) => {
   return (
     <div className="page-header">
       <h2><Gauge size={18} style={{ marginRight: '8px' }} /> 年度绩效总览</h2>
-      <YearSelector currentYear={currentYear} onChange={onYearChange} />
       <div className="page-actions">
-        <Button onClick={onSaveAllData}>
-          <Save size={16} style={{ marginRight: '8px' }} /> 保存数据
-        </Button>
-        <Button onClick={toggleDarkMode} type="light">
+        <YearSelector currentYear={currentYear} onChange={onYearChange} />
+        {/* <Button onClick={toggleDarkMode} type="light">
           {darkMode ? <Sun size={16} /> : <Moon size={16} />}
-        </Button>
+        </Button> */}
       </div>
     </div>
   );

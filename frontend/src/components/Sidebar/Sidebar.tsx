@@ -1,7 +1,5 @@
 import React from 'react';
-import { Gauge, Palette, History, Settings, PanelLeftClose, Languages, Target, HelpCircle, BookOpen, PanelRightOpen } from 'lucide-react';
-
-import type { Account } from '../../utils/PerformanceSystem';
+import { Gauge, Palette, History, Settings, ChevronLeft, Languages, Target, HelpCircle, BookOpen, ChevronRight } from 'lucide-react';
 
 interface SidebarProps {
   currentPage: string;
@@ -15,13 +13,9 @@ interface SidebarProps {
     zh: { [key: string]: string };
     en: { [key: string]: string };
   };
-  currentAccount: Account | null;
-  onSwitchAccount: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange, darkMode, isCollapsed, onToggleCollapse, language, toggleLanguage, translations, 
-  // currentAccount, onSwitchAccount 
-}) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange, darkMode, isCollapsed, onToggleCollapse, language, toggleLanguage, translations }) => {
   const navItems = [
     { id: 'dashboard', icon: <Gauge size={20} /> },
     { id: 'dimension', icon: <Palette size={20} /> },
@@ -42,12 +36,12 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange, darkMode, 
           className="sidebar-toggle-btn"
           onClick={onToggleCollapse}
         >
-          {isCollapsed ? <PanelRightOpen size={20} strokeWidth={1.25} /> : <PanelLeftClose size={20} strokeWidth={1.25} />}
+          {isCollapsed ? <ChevronRight size={20} strokeWidth={1.25} /> : <ChevronLeft size={20} strokeWidth={1.25} />}
         </button>
       </div>
       
       {/* Search bar */}
-      <div className={`search-bar-container ${isCollapsed ? 'collapsed' : ''}`}>
+      {/* <div className={`search-bar-container ${isCollapsed ? 'collapsed' : ''}`}>
         <div className="search-bar">
           <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -58,7 +52,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange, darkMode, 
             </div>
           )}
         </div>
-      </div>
+      </div> */}
 
       {navItems.map(item => (
         <a
@@ -127,25 +121,6 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange, darkMode, 
       
       {/* 帮助中心和用户信息之间的分隔线 */}
       <hr className="sidebar-divider" />
-      
-      {/* 用户信息和切换账号 - 只有当有头像时才显示 */}
-      {/* {currentAccount?.avatarPath && currentAccount.avatarPath !== '' && (
-        <div className="user-section">
-          <div 
-            className="user-info"
-            onClick={onSwitchAccount}
-          >
-            <div className="user-avatar-container">
-              <img 
-                src={currentAccount.avatarPath}
-                alt={currentAccount.username || ''} 
-                className="user-avatar"
-              />
-            </div>
-            {!isCollapsed && <div className="user-name">{currentAccount.username || ''}</div>}
-          </div>
-        </div>
-      )} */}
       
       {/* 语言切换按钮 */}
       <button

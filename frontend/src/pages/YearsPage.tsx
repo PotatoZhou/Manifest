@@ -1,10 +1,9 @@
 import React, { useEffect } from 'react';
-import { Calendar, Save, FileSpreadsheet, Sun, Moon, BarChart, Eye, LineChart, Scale } from 'lucide-react';
+import { Calendar, BarChart, LineChart, Scale } from 'lucide-react';
 import { performanceSystem } from '../utils/PerformanceSystem';
-import Button from '../components/Button/Button';
+// import Button from '../components/Button/Button';
 import YearSelector from '../components/YearSelector/YearSelector';
 import Chart from 'chart.js/auto';
-import * as XLSX from 'xlsx';
 
 interface YearsPageProps {
   currentYear: string;
@@ -13,73 +12,10 @@ interface YearsPageProps {
   toggleDarkMode: () => void;
 }
 
-const YearsPage: React.FC<YearsPageProps> = ({ currentYear, onYearChange, darkMode, toggleDarkMode }) => {
+const YearsPage: React.FC<YearsPageProps> = ({ currentYear, onYearChange }) => {
   const years = performanceSystem.getAvailableYears();
   const allData = performanceSystem.getAllData();
 
-  // 保存所有数据
-  const handleSaveAllData = () => {
-    // performanceSystem.saveData() 已在数据修改后自动调用
-    const alertElement = document.getElementById('alert-success');
-    if (alertElement) {
-      alertElement.style.display = 'block';
-      setTimeout(() => {
-        alertElement.style.display = 'none';
-      }, 3000);
-    }
-  };
-
-  // 导出到Excel
-  const handleExportToExcel = () => {
-    try {
-      // 创建简单的测试数据
-      const testData = [
-        ['年份', '年度平均分'],
-        ['2023', '85'],
-        ['2024', '90'],
-        ['2025', '92']
-      ];
-      
-      // 创建工作簿和工作表
-      const worksheet = XLSX.utils.aoa_to_sheet(testData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, '历年绩效数据');
-      
-      // 导出Excel文件
-      const fileName = `performance-data-${new Date().toISOString().split('T')[0]}.xlsx`;
-      XLSX.writeFile(workbook, fileName);
-      
-      alert('导出成功！文件已保存到下载文件夹。');
-    } catch (error) {
-      console.error('导出失败:', error);
-      alert('导出失败: ' + (error as Error).message);
-    }
-  };
-
-  // 导入JSON数据
-  const handleImportFromJson = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-          try {
-            const data = JSON.parse(event.target?.result as string);
-            await performanceSystem.importData(data);
-            // 刷新页面数据
-            window.location.reload();
-          } catch (error) {
-            alert('导入失败：' + (error as Error).message);
-          }
-        };
-        reader.readAsText(file);
-      }
-    };
-    input.click();
-  };
 
   // 计算年度平均分（按当年维度配置动态计算）
   const calculateYearAverage = (yearData: import('../utils/PerformanceSystem').AnnualData) => {
@@ -224,20 +160,17 @@ const YearsPage: React.FC<YearsPageProps> = ({ currentYear, onYearChange, darkMo
     <div id="years-page" className="page" style={{ padding: '20px 30px' }}>
       <div className="page-header">
         <h2><Calendar size={18} style={{ marginRight: '8px' }} /> 历年绩效对比</h2>
-        <YearSelector currentYear={currentYear} onChange={onYearChange} />
         <div className="page-actions">
-          <Button onClick={handleSaveAllData}>
+          <YearSelector currentYear={currentYear} onChange={onYearChange}/>
+          {/* <Button onClick={handleSaveAllData}>
             <Save size={16} style={{ marginRight: '8px' }} /> 保存数据
-          </Button>
-          <Button type="success" onClick={handleExportToExcel}>
+          </Button> */}
+          {/* <Button type="success" onClick={handleExportToExcel}>
             <FileSpreadsheet size={16} style={{ marginRight: '8px' }} /> 导出Excel
-          </Button>
-          <Button type="primary" onClick={handleImportFromJson}>
-            <FileSpreadsheet size={16} style={{ marginRight: '8px' }} /> 导入JSON
-          </Button>
-          <Button onClick={toggleDarkMode} type="light">
+          </Button> */}
+          {/* <Button onClick={toggleDarkMode} type="light">
             {darkMode ? <Sun size={16} /> : <Moon size={16} />}
-          </Button>
+          </Button> */}
         </div>
       </div>
       
@@ -266,7 +199,6 @@ const YearsPage: React.FC<YearsPageProps> = ({ currentYear, onYearChange, darkMo
                   <th key={cfg.key}>{cfg.title}</th>
                 ))}
                 <th>年度平均分</th>
-                <th>操作</th>
               </tr>
             </thead>
             <tbody>
@@ -280,11 +212,11 @@ const YearsPage: React.FC<YearsPageProps> = ({ currentYear, onYearChange, darkMo
                       <td key={dk}>{yearData.dimensions?.[dk]?.totalScore || 0} 分</td>
                     ))}
                     <td>{calculateYearAverage(yearData)} 分</td>
-                    <td>
+                    {/* <td>
                       <Button size="sm" onClick={() => onYearChange(year)}>
                         <Eye size={16} style={{ marginRight: '8px' }} /> 查看详情
                       </Button>
-                    </td>
+                    </td> */}
                   </tr>
                 );
               })}
