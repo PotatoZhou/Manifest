@@ -26,15 +26,6 @@ Manifest是一个现代化的绩效评估工具，帮助你设定年度目标、
 - 📅 **年度/季度/月度规划**：分层级管理目标与任务，实现精细化计划
 - 💾 **本地数据存储**：数据安全存储在本地，保护隐私
 
-## 📸 效果预览
-
-<p align="center">
-  <img src="img/ss02.png" alt="维度管理" width="80%" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
-</p>
-<p align="center">
-  <img src="img/ss01.png" alt="仪表盘总览" width="80%" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
-</p>
-
 
 ## 🏗️ 架构设计
 
