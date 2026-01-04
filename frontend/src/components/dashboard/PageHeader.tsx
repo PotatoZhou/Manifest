@@ -1,5 +1,5 @@
 import React from 'react';
-import { Gauge, Save, FileSpreadsheet, Sun, Moon } from 'lucide-react';
+import { Gauge, Save, Sun, Moon } from 'lucide-react';
 import Button from '../Button/Button';
 import YearSelector from '../YearSelector/YearSelector';
 
@@ -18,7 +18,6 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   darkMode, 
   toggleDarkMode,
   onSaveAllData,
-  onExportToExcel
 }) => {
   return (
     <div className="page-header">
@@ -27,9 +26,6 @@ const PageHeader: React.FC<PageHeaderProps> = ({
       <div className="page-actions">
         <Button onClick={onSaveAllData}>
           <Save size={16} style={{ marginRight: '8px' }} /> 保存数据
-        </Button>
-        <Button type="success" onClick={onExportToExcel}>
-          <FileSpreadsheet size={16} style={{ marginRight: '8px' }} /> 导出Excel
         </Button>
         <Button onClick={toggleDarkMode} type="light">
           {darkMode ? <Sun size={16} /> : <Moon size={16} />}
